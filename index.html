@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Inmuebles</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <button class="btn secondary" onclick="window.location.href='buildings.html'">
+                    <i class="fas fa-arrow-left"></i> Volver a Edificios
+                </button>
+            </div>
+            <h1>Sistema de Gestión de Inmuebles</h1>
+            <div class="header-right">
+                <button class="btn danger" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="left-controls">
+                <button id="showFormBtn" class="btn primary"><i class="fas fa-plus"></i> Nuevo Inmueble</button>
+                <button id="deleteSelectedBtn" class="btn danger" style="display: none;"><i class="fas fa-trash"></i> Eliminar Seleccionados</button>
+                <button id="showReportsBtn" class="btn secondary"><i class="fas fa-chart-bar"></i> Reportes</button>
+                <button id="showCommissionCalculatorBtn" class="btn secondary"><i class="fas fa-calculator"></i> Calculadora de Comisiones</button>
+                <button id="showCommissionStatusBtn" class="btn secondary"><i class="fas fa-money-check-alt"></i> Estado de Comisiones</button>
+            </div>
+            <div class="search-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por título, dirección o descripción...">
+                </div>
+                <div class="advanced-filters">
+                    <button class="btn secondary" id="toggleAdvancedFilters">
+                        <i class="fas fa-sliders-h"></i> Filtros Avanzados
+                    </button>
+                </div>
+                <div class="sort-options">
+                    <select id="sortBy">
+                        <option value="">Ordenar por</option>
+                        <option value="precio-asc">Precio: Menor a Mayor</option>
+                        <option value="precio-desc">Precio: Mayor a Menor</option>
+                        <option value="area-asc">Área: Menor a Mayor</option>
+                        <option value="area-desc">Área: Mayor a Menor</option>
+                        <option value="fecha-desc">Más Recientes</option>
+                        <option value="fecha-asc">Más Antiguos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="propertyTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th><i class="fas fa-home"></i> Tipo</th>
+                        <th><i class="fas fa-tag"></i> Título</th>
+                        <th><i class="fas fa-map-marker-alt"></i> Dirección</th>
+                        <th><i class="fas fa-dollar-sign"></i> Precio Venta</th>
+                        <th><i class="fas fa-key"></i> Precio Arriendo</th>
+                        <th><i class="fas fa-ruler-combined"></i> Área</th>
+                        <th><i class="fas fa-star"></i> Estado</th>
+                        <th><i class="fas fa-tags"></i> Disponibilidad</th>
+                        <th><i class="fas fa-money-bill-wave"></i> Comisión</th>
+                        <th><i class="fas fa-cog"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="propertyList">
+                    <!-- Las propiedades se agregarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Nuevo Inmueble</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="propertyForm">
+                <div class="form-group">
+                    <label for="tipo">Tipo de Inmueble*</label>
+                    <select id="tipo" required>
+                        <option value="casa">Casa</option>
+                        <option value="apartamento">Apartamento</option>
+                        <option value="local">Local Comercial</option>
+                        <option value="bodega">Bodega</option>
+                        <option value="terreno">Terreno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="titulo">Título*</label>
+                    <input type="text" id="titulo" required>
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Dirección*</label>
+                    <input type="text" id="direccion" required>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio*</label>
+                    <input type="number" id="precio" required min="0">
+                </div>
+                <div class="form-group">
+                    <label for="precioArriendo">Precio de Arriendo Mensual</label>
+                    <input type="number" id="precioArriendo" min="0" placeholder="Solo si está disponible para arriendo">
+                </div>
+                <div class="form-group">
+                    <label for="area">Área (m²)*</label>
+                    <input type="number" id="area" required min="0">
+                </div>
+                <div class="form-group">
+                    <label for="habitaciones">Habitaciones</label>
+                    <input type="number" id="habitaciones" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="banos">Baños</label>
+                    <input type="number" id="banos" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="estacionamientos">Estacionamientos</label>
+                    <input type="number" id="estacionamientos" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="antiguedad">Antigüedad (años)</label>
+                    <input type="number" id="antiguedad" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado">
+                        <option value="nuevo">Nuevo</option>
+                        <option value="excelente">Excelente</option>
+                        <option value="bueno">Bueno</option>
+                        <option value="regular">Regular</option>
+                        <option value="remodelar">Para remodelar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="disponibilidad">Disponibilidad*</label>
+                    <select id="disponibilidad" required>
+                        <option value="venta">En Venta</option>
+                        <option value="arriendo">En Arriendo</option>
+                        <option value="ambas">Venta y Arriendo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Servicios</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="agua">
+                            <label for="agua">Agua</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="luz">
+                            <label for="luz">Luz</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gas">
+                            <label for="gas">Gas</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="internet">
+                            <label for="internet">Internet</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Características Adicionales</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="piscina">
+                            <label for="piscina">Piscina</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="jardin">
+                            <label for="jardin">Jardín</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="seguridad">
+                            <label for="seguridad">Seguridad 24/7</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="amueblado">
+                            <label for="amueblado">Amueblado</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contacto">Información de Contacto*</label>
+                    <input type="text" id="contacto" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">Guardar</button>
+                    <button type="button" class="btn secondary" id="cancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros Avanzados -->
+    <div id="filtersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Filtros Avanzados</h2>
+                <button class="close-btn" id="closeFiltersBtn">&times;</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Tipo de Inmueble</label>
+                    <select id="propertyType" multiple>
+                        <option value="casa">Casa</option>
+                        <option value="apartamento">Apartamento</option>
+                        <option value="local">Local Comercial</option>
+                        <option value="bodega">Bodega</option>
+                        <option value="terreno">Terreno</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Rango de Precio</label>
+                    <div class="price-inputs">
+                        <input type="number" id="priceMin" placeholder="Desde" min="0">
+                        <input type="number" id="priceMax" placeholder="Hasta" min="0">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Rango de Área (m²)</label>
+                    <div class="price-inputs">
+                        <input type="number" id="areaMin" placeholder="Desde" min="0">
+                        <input type="number" id="areaMax" placeholder="Hasta" min="0">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Habitaciones</label>
+                    <select id="habitaciones">
+                        <option value="">Cualquiera</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                        <option value="5">5+</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Baños</label>
+                    <select id="banos">
+                        <option value="">Cualquiera</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select id="estadoFilter">
+                        <option value="">Todos</option>
+                        <option value="nuevo">Nuevo</option>
+                        <option value="excelente">Excelente</option>
+                        <option value="bueno">Bueno</option>
+                        <option value="regular">Regular</option>
+                        <option value="remodelar">Para remodelar</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Características</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterPiscina">
+                            <label for="filterPiscina">Piscina</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterJardin">
+                            <label for="filterJardin">Jardín</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterSeguridad">
+                            <label for="filterSeguridad">Seguridad 24/7</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterAmueblado">
+                            <label for="filterAmueblado">Amueblado</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Servicios</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterAgua">
+                            <label for="filterAgua">Agua</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterLuz">
+                            <label for="filterLuz">Luz</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterGas">
+                            <label for="filterGas">Gas</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="filterInternet">
+                            <label for="filterInternet">Internet</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn secondary" id="clearFilters">
+                    <i class="fas fa-times"></i> Limpiar Filtros
+                </button>
+                <button class="btn primary" id="applyFilters">
+                    <i class="fas fa-check"></i> Aplicar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reportes -->
+    <div id="reportsModal" class="modal">
+        <div class="modal-content reports-modal">
+            <div class="modal-header">
+                <h2>Reportes Estadísticos</h2>
+                <button class="close-btn" id="closeReportsBtn">&times;</button>
+            </div>
+            <div class="reports-content">
+                <div class="reports-filters">
+                    <div class="filter-group">
+                        <label>Período</label>
+                        <select id="reportPeriod">
+                            <option value="all">Todo el tiempo</option>
+                            <option value="month">Último mes</option>
+                            <option value="quarter">Último trimestre</option>
+                            <option value="year">Último año</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tipo de Inmueble</label>
+                        <select id="reportPropertyType">
+                            <option value="all">Todos</option>
+                            <option value="casa">Casa</option>
+                            <option value="apartamento">Apartamento</option>
+                            <option value="local">Local Comercial</option>
+                            <option value="bodega">Bodega</option>
+                            <option value="terreno">Terreno</option>
+                        </select>
+                    </div>
+                    <button class="btn primary" id="generateReport">
+                        <i class="fas fa-chart-bar"></i> Generar Reporte
+                    </button>
+                    <button class="btn secondary" id="exportCSV">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                </div>
+
+                <!-- Sección de Resumen de Comisiones -->
+                <div class="commission-summary">
+                    <h3>Resumen de Comisiones</h3>
+                    <div class="commission-summary-grid">
+                        <div class="summary-card">
+                            <h4>Comisiones Totales</h4>
+                            <div class="summary-content">
+                                <div class="summary-item">
+                                    <span>Total de Comisiones:</span>
+                                    <span id="totalCommissions">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Comisiones de Venta:</span>
+                                    <span id="totalSaleCommissions">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Comisiones de Arriendo:</span>
+                                    <span id="totalRentCommissions">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Tu Comisión (50%)</h4>
+                            <div class="summary-content">
+                                <div class="summary-item">
+                                    <span>Total:</span>
+                                    <span id="yourTotalCommission">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Ventas:</span>
+                                    <span id="yourSaleCommission">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Arriendos:</span>
+                                    <span id="yourRentCommission">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Comisión Socio (50%)</h4>
+                            <div class="summary-content">
+                                <div class="summary-item">
+                                    <span>Total:</span>
+                                    <span id="partnerTotalCommission">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Ventas:</span>
+                                    <span id="partnerSaleCommission">$0.00</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Arriendos:</span>
+                                    <span id="partnerRentCommission">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Distribución de Precios</h3>
+                        <div class="report-value" id="averagePrice">$0</div>
+                        <div class="report-chart">
+                            <canvas id="priceDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Precio por m²</h3>
+                        <div class="report-value" id="pricePerM2">$0</div>
+                        <div class="report-chart">
+                            <canvas id="pricePerM2Chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Rango de Precios</h3>
+                        <div class="report-value">
+                            <div>Mínimo: <span id="minPrice">$0</span></div>
+                            <div>Máximo: <span id="maxPrice">$0</span></div>
+                        </div>
+                        <div class="report-chart">
+                            <canvas id="priceRangeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <h3>Tendencia de Precios</h3>
+                        <div class="report-value" id="priceTrend">-</div>
+                        <div class="report-chart">
+                            <canvas id="priceTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reports-table-container">
+                    <h3>Resumen de Precios por Tipo</h3>
+                    <table id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Precio Promedio</th>
+                                <th>Precio/m²</th>
+                                <th>Mínimo</th>
+                                <th>Máximo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Comisiones por Inmueble -->
+    <div id="propertyCommissionModal" class="modal">
+        <div class="modal-content commission-modal">
+            <div class="modal-header">
+                <h2>Comisiones del Inmueble</h2>
+                <button class="close-btn" id="closeCommissionBtn">&times;</button>
+            </div>
+            <div class="commission-content">
+                <div class="property-info">
+                    <h3 id="commissionPropertyTitle"></h3>
+                    <p id="commissionPropertyAddress"></p>
+                </div>
+                
+                <div class="commission-actions">
+                    <div class="commission-type-selector">
+                        <button class="btn primary active" data-type="sale">Venta</button>
+                        <button class="btn secondary" data-type="rent">Arriendo</button>
+                    </div>
+                    
+                    <div class="commission-form" id="saleCommissionForm">
+                        <div class="commission-info">
+                            <div class="info-item">
+                                <label>Precio de Venta Registrado:</label>
+                                <span id="propertySalePriceDisplay" class="price-display">$0.00</span>
+                            </div>
+                        </div>
+                        <div class="commission-result">
+                            <div class="result-item">
+                                <span>Comisión Total (3%):</span>
+                                <span id="propertyTotalSaleCommission">$0.00</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tu Comisión (50%):</span>
+                                <span id="propertyYourSaleCommission">$0.00</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Comisión Socio (50%):</span>
+                                <span id="propertyPartnerSaleCommission">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn primary" id="saveSaleCommission">
+                            <i class="fas fa-save"></i> Guardar Comisión de Venta
+                        </button>
+                    </div>
+
+                    <div class="commission-form" id="rentCommissionForm" style="display: none;">
+                        <div class="commission-info">
+                            <div class="info-item">
+                                <label>Precio de Arriendo Mensual Registrado:</label>
+                                <span id="propertyRentPriceDisplay" class="price-display">$0.00</span>
+                            </div>
+                            <div class="input-group">
+                                <label for="propertyRentMonths">Duración del Contrato (meses)</label>
+                                <input type="number" id="propertyRentMonths" placeholder="Número de meses" value="12" min="1">
+                            </div>
+                        </div>
+                        <div class="commission-result">
+                            <div class="result-item">
+                                <span>Comisión Total (1 mes):</span>
+                                <span id="propertyTotalRentCommission">$0.00</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tu Comisión (50%):</span>
+                                <span id="propertyYourRentCommission">$0.00</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Comisión Socio (50%):</span>
+                                <span id="propertyPartnerRentCommission">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn primary" id="saveRentCommission">
+                            <i class="fas fa-save"></i> Guardar Comisión de Arriendo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="commission-history">
+                    <h3>Historial de Comisiones</h3>
+                    <table id="commissionHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Comisión Total</th>
+                                <th>Tu Comisión</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissionHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reporte de Comisiones -->
+    <div id="commissionReportsModal" class="modal">
+        <div class="modal-content reports-modal">
+            <div class="modal-header">
+                <h2>Reporte de Comisiones</h2>
+                <button class="close-btn" id="closeCommissionReportsBtn">&times;</button>
+            </div>
+            <div class="reports-content">
+                <div class="reports-filters">
+                    <div class="filter-group">
+                        <label>Período</label>
+                        <select id="commissionReportPeriod">
+                            <option value="all">Todo el tiempo</option>
+                            <option value="month">Último mes</option>
+                            <option value="quarter">Último trimestre</option>
+                            <option value="year">Último año</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tipo de Inmueble</label>
+                        <select id="commissionReportPropertyType">
+                            <option value="all">Todos</option>
+                            <option value="casa">Casa</option>
+                            <option value="apartamento">Apartamento</option>
+                            <option value="local">Local Comercial</option>
+                            <option value="bodega">Bodega</option>
+                            <option value="terreno">Terreno</option>
+                        </select>
+                    </div>
+                    <button class="btn primary" id="generateCommissionReport">
+                        <i class="fas fa-chart-bar"></i> Generar Reporte
+                    </button>
+                    <button class="btn secondary" id="exportCommissionCSV">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                </div>
+
+                <div class="commission-history-table">
+                    <h3>Historial de Comisiones</h3>
+                    <table id="commissionReportTable">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Inmueble</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Comisión Total</th>
+                                <th>Tu Comisión</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissionReportBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Calculadora de Comisiones -->
+    <div id="commissionCalculatorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Calculadora de Comisiones</h2>
+                <button class="close-btn" id="closeCommissionCalculatorBtn">&times;</button>
+            </div>
+            <div class="commission-calculator">
+                <div class="commission-grid">
+                    <div class="commission-card">
+                        <h4>Venta de Inmueble</h4>
+                        <div class="commission-inputs">
+                            <div class="input-group">
+                                <label for="salePrice">Precio de Venta</label>
+                                <input type="number" id="salePrice" placeholder="Ingrese el precio">
+                            </div>
+                            <div class="commission-result">
+                                <div class="result-item">
+                                    <span>Comisión Total (3%):</span>
+                                    <span id="totalSaleCommission">$0.00</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Tu Comisión (50%):</span>
+                                    <span id="yourSaleCommission">$0.00</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Comisión Socio (50%):</span>
+                                    <span id="partnerSaleCommission">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="commission-card">
+                        <h4>Arriendo de Inmueble</h4>
+                        <div class="commission-inputs">
+                            <div class="input-group">
+                                <label for="rentPrice">Precio Mensual de Arriendo</label>
+                                <input type="number" id="rentPrice" placeholder="Ingrese el precio mensual">
+                            </div>
+                            <div class="input-group">
+                                <label for="rentMonths">Duración del Contrato (meses)</label>
+                                <input type="number" id="rentMonths" placeholder="Número de meses" value="12">
+                            </div>
+                            <div class="commission-result">
+                                <div class="result-item">
+                                    <span>Comisión Total (1 mes):</span>
+                                    <span id="totalRentCommission">$0.00</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Tu Comisión (50%):</span>
+                                    <span id="yourRentCommission">$0.00</span>
+                                </div>
+                                <div class="result-item">
+                                    <span>Comisión Socio (50%):</span>
+                                    <span id="partnerRentCommission">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Estado de Comisiones -->
+    <div id="commissionStatusModal" class="modal">
+        <div class="modal-content reports-modal">
+            <div class="modal-header">
+                <h2>Estado de Comisiones</h2>
+                <button class="close-btn" id="closeCommissionStatusBtn">&times;</button>
+            </div>
+            <div class="reports-content">
+                <div class="reports-filters">
+                    <div class="filter-group">
+                        <label>Período</label>
+                        <select id="commissionStatusPeriod">
+                            <option value="all">Todo el tiempo</option>
+                            <option value="month">Último mes</option>
+                            <option value="quarter">Último trimestre</option>
+                            <option value="year">Último año</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Estado</label>
+                        <select id="commissionStatusFilter">
+                            <option value="all">Todos</option>
+                            <option value="pending">Pendientes</option>
+                            <option value="paid">Pagadas</option>
+                            <option value="overdue">Vencidas</option>
+                        </select>
+                    </div>
+                    <button class="btn primary" id="generateCommissionStatus">
+                        <i class="fas fa-sync"></i> Actualizar
+                    </button>
+                    <button class="btn secondary" id="exportCommissionStatusCSV">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                </div>
+
+                <div class="commission-status-summary">
+                    <div class="summary-card">
+                        <h4>Resumen de Comisiones</h4>
+                        <div class="summary-content">
+                            <div class="summary-item">
+                                <span>Total Pendiente:</span>
+                                <span id="totalPendingCommission">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total Pagado:</span>
+                                <span id="totalPaidCommission">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total Vencido:</span>
+                                <span id="totalOverdueCommission">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="commission-status-table">
+                    <table id="commissionStatusTable">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Inmueble</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                                <th>Comisión</th>
+                                <th>Estado</th>
+                                <th>Fecha Pago</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissionStatusBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="storage.js"></script>
+    <script>
+        const ModalManager = {
+            modals: {},
+            storage: null,
+            currentProperty: null,
+
+            init() {
+                this.storage = new PropertyStorage();
+                
+                document.querySelectorAll('.modal').forEach(modal => {
+                    this.modals[modal.id] = modal;
+                });
+
+                document.querySelectorAll('.close-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const modal = btn.closest('.modal');
+                        if (modal) {
+                            this.close(modal.id);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            this.close(modal.id);
+                        }
+                    });
+                });
+
+                this.setupActionButtons();
+            },
+
+            setupActionButtons() {
+                const showFormBtn = document.getElementById('showFormBtn');
+                if (showFormBtn) {
+                    showFormBtn.addEventListener('click', () => this.open('propertyModal'));
+                }
+
+                const toggleAdvancedFilters = document.getElementById('toggleAdvancedFilters');
+                if (toggleAdvancedFilters) {
+                    toggleAdvancedFilters.addEventListener('click', () => this.open('filtersModal'));
+                }
+
+                const showReportsBtn = document.getElementById('showReportsBtn');
+                if (showReportsBtn) {
+                    showReportsBtn.addEventListener('click', () => this.open('reportsModal'));
+                }
+
+                const showCommissionCalculatorBtn = document.getElementById('showCommissionCalculatorBtn');
+                if (showCommissionCalculatorBtn) {
+                    showCommissionCalculatorBtn.addEventListener('click', () => this.open('commissionCalculatorModal'));
+                }
+
+                const showCommissionStatusBtn = document.getElementById('showCommissionStatusBtn');
+                if (showCommissionStatusBtn) {
+                    showCommissionStatusBtn.addEventListener('click', () => {
+                        this.open('commissionStatusModal');
+                        this.updateCommissionStatus();
+                    });
+                }
+
+                const commissionTypeButtons = document.querySelectorAll('.commission-type-selector button');
+                commissionTypeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const type = button.dataset.type;
+                        commissionTypeButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        document.getElementById('saleCommissionForm').style.display = type === 'sale' ? 'block' : 'none';
+                        document.getElementById('rentCommissionForm').style.display = type === 'rent' ? 'block' : 'none';
+                    });
+                });
+
+                const saveSaleCommissionBtn = document.getElementById('saveSaleCommission');
+                if (saveSaleCommissionBtn) {
+                    saveSaleCommissionBtn.addEventListener('click', () => this.saveSaleCommission());
+                }
+
+                const saveRentCommissionBtn = document.getElementById('saveRentCommission');
+                if (saveRentCommissionBtn) {
+                    saveRentCommissionBtn.addEventListener('click', () => this.saveRentCommission());
+                }
+
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        localStorage.removeItem('isAuthenticated');
+                        localStorage.removeItem('rememberedUser');
+                        window.location.href = 'login.html';
+                    });
+                }
+
+                const generateReportBtn = document.getElementById('generateReport');
+                if (generateReportBtn) {
+                    generateReportBtn.addEventListener('click', () => this.generateReport());
+                }
+
+                const exportCSVBtn = document.getElementById('exportCSV');
+                if (exportCSVBtn) {
+                    exportCSVBtn.addEventListener('click', () => this.exportReportToCSV());
+                }
+
+                const generateCommissionReportBtn = document.getElementById('generateCommissionReport');
+                if (generateCommissionReportBtn) {
+                    generateCommissionReportBtn.addEventListener('click', () => this.generateCommissionReport());
+                }
+
+                const exportCommissionCSVBtn = document.getElementById('exportCommissionCSV');
+                if (exportCommissionCSVBtn) {
+                    exportCommissionCSVBtn.addEventListener('click', () => this.exportCommissionReportToCSV());
+                }
+            },
+
+            open(modalId) {
+                const modal = this.modals[modalId];
+                if (modal) {
+                    modal.style.display = 'flex';
+                    setTimeout(() => {
+                        modal.style.opacity = '1';
+                    }, 10);
+                    document.body.style.overflow = 'hidden';
+                }
+            },
+
+            close(modalId) {
+                const modal = this.modals[modalId];
+                if (modal) {
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                    document.body.style.overflow = '';
+                }
+            },
+
+            editProperty(id) {
+                const property = this.storage.getPropertyById(id);
+                if (property) {
+                    const form = document.getElementById('propertyForm');
+                    if (form) {
+                        Object.keys(property).forEach(key => {
+                            const input = form.elements[key];
+                            if (input) {
+                                if (input.type === 'checkbox') {
+                                    input.checked = property[key];
+                                } else {
+                                    input.value = property[key];
+                                }
+                            }
+                        });
+                        this.open('propertyModal');
+                    }
+                }
+            },
+
+            deleteProperty(id) {
+                if (confirm('¿Está seguro de que desea eliminar esta propiedad?')) {
+                    this.storage.deleteProperty(id);
+                    updateTable(this.storage.getAllProperties());
+                }
+            },
+
+            openPropertyCommissionModal(id) {
+                const property = this.storage.getPropertyById(id);
+                if (property) {
+                    this.currentProperty = property;
+                    document.getElementById('commissionPropertyTitle').textContent = property.titulo;
+                    document.getElementById('commissionPropertyAddress').textContent = property.direccion;
+                    document.getElementById('propertySalePriceDisplay').textContent = formatCurrency(property.precio);
+                    document.getElementById('propertyRentPriceDisplay').textContent = formatCurrency(property.precioArriendo || 0);
+                    
+                    const salePrice = parseFloat(property.precio);
+                    const totalSaleCommission = salePrice * 0.03;
+                    document.getElementById('propertyTotalSaleCommission').textContent = formatCurrency(totalSaleCommission);
+                    document.getElementById('propertyYourSaleCommission').textContent = formatCurrency(totalSaleCommission * 0.5);
+                    document.getElementById('propertyPartnerSaleCommission').textContent = formatCurrency(totalSaleCommission * 0.5);
+
+                    const rentPrice = parseFloat(property.precioArriendo || 0);
+                    document.getElementById('propertyTotalRentCommission').textContent = formatCurrency(rentPrice);
+                    document.getElementById('propertyYourRentCommission').textContent = formatCurrency(rentPrice * 0.5);
+                    document.getElementById('propertyPartnerRentCommission').textContent = formatCurrency(rentPrice * 0.5);
+
+                    this.updateCommissionHistory(property);
+                    this.open('propertyCommissionModal');
+                }
+            },
+
+            updateCommissionHistory(property) {
+                const tbody = document.getElementById('commissionHistoryBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                if (property.commissions && property.commissions.length > 0) {
+                    property.commissions.forEach(commission => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(commission.date).toLocaleDateString()}</td>
+                            <td>${commission.type === 'sale' ? 'Venta' : 'Arriendo'}</td>
+                            <td>${formatCurrency(commission.amount)}</td>
+                            <td>${formatCurrency(commission.totalCommission)}</td>
+                            <td>${formatCurrency(commission.yourCommission)}</td>
+                            <td><span class="status-badge ${commission.status}">${this.getStatusText(commission.status)}</span></td>
+                            <td>
+                                <button onclick="ModalManager.updateCommissionStatus(${property.id}, ${commission.id})" class="btn-icon edit" title="Cambiar Estado">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="ModalManager.deleteCommission(${property.id}, ${commission.id})" class="btn-icon delete" title="Eliminar Comisión">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            },
+
+            deleteCommission(propertyId, commissionId) {
+                if (!confirm('¿Está seguro de que desea eliminar esta comisión?')) {
+                    return;
+                }
+
+                const property = this.storage.getPropertyById(propertyId);
+                if (!property || !property.commissions) return;
+
+                property.commissions = property.commissions.filter(c => c.id !== commissionId);
+                this.storage.updateProperty(property);
+                this.updateCommissionHistory(property);
+                updateTable(this.storage.getAllProperties());
+                alert('Comisión eliminada exitosamente');
+            },
+
+            getStatusText(status) {
+                const statusMap = {
+                    'pending': 'Pendiente',
+                    'paid': 'Pagado',
+                    'overdue': 'Vencido'
+                };
+                return statusMap[status] || status;
+            },
+
+            updateCommissionStatus() {
+                const period = document.getElementById('commissionStatusPeriod').value;
+                const statusFilter = document.getElementById('commissionStatusFilter').value;
+                const properties = this.storage.getAllProperties();
+                
+                // Obtener todas las comisiones
+                let allCommissions = [];
+                properties.forEach(property => {
+                    if (property.commissions && property.commissions.length > 0) {
+                        property.commissions.forEach(commission => {
+                            allCommissions.push({
+                                ...commission,
+                                propertyTitle: property.titulo,
+                                propertyType: property.tipo,
+                                propertyAddress: property.direccion
+                            });
+                        });
+                    }
+                });
+
+                // Filtrar por período
+                if (period !== 'all') {
+                    const now = new Date();
+                    const cutoffDate = new Date();
+                    switch (period) {
+                        case 'month':
+                            cutoffDate.setMonth(now.getMonth() - 1);
+                            break;
+                        case 'quarter':
+                            cutoffDate.setMonth(now.getMonth() - 3);
+                            break;
+                        case 'year':
+                            cutoffDate.setFullYear(now.getFullYear() - 1);
+                            break;
+                    }
+                    allCommissions = allCommissions.filter(c => new Date(c.date) >= cutoffDate);
+                }
+
+                // Filtrar por estado
+                if (statusFilter !== 'all') {
+                    allCommissions = allCommissions.filter(c => c.status === statusFilter);
+                }
+
+                // Calcular estadísticas detalladas
+                const stats = this.calculateDetailedCommissionStats(allCommissions);
+                this.updateCommissionStatusUI(stats, allCommissions);
+            },
+
+            calculateDetailedCommissionStats(commissions) {
+                const stats = {
+                    totalCommissions: 0,
+                    totalAmount: 0,
+                    totalCommission: 0,
+                    yourTotalCommission: 0,
+                    partnerTotalCommission: 0,
+                    byType: {
+                        sale: { count: 0, amount: 0, commission: 0 },
+                        rent: { count: 0, amount: 0, commission: 0 }
+                    },
+                    byStatus: {
+                        pending: { count: 0, amount: 0, commission: 0 },
+                        paid: { count: 0, amount: 0, commission: 0 },
+                        overdue: { count: 0, amount: 0, commission: 0 }
+                    },
+                    byMonth: {},
+                    byPropertyType: {},
+                    averageCommission: 0,
+                    highestCommission: 0,
+                    lowestCommission: Infinity,
+                    recentActivity: []
+                };
+
+                // Ordenar comisiones por fecha para actividad reciente
+                const sortedCommissions = [...commissions].sort((a, b) => new Date(b.date) - new Date(a.date));
+                stats.recentActivity = sortedCommissions.slice(0, 5);
+
+                commissions.forEach(commission => {
+                    // Totales generales
+                    stats.totalCommissions++;
+                    stats.totalAmount += commission.amount;
+                    stats.totalCommission += commission.totalCommission;
+                    stats.yourTotalCommission += commission.yourCommission;
+                    stats.partnerTotalCommission += commission.partnerCommission;
+
+                    // Por tipo
+                    stats.byType[commission.type].count++;
+                    stats.byType[commission.type].amount += commission.amount;
+                    stats.byType[commission.type].commission += commission.totalCommission;
+
+                    // Por estado
+                    stats.byStatus[commission.status].count++;
+                    stats.byStatus[commission.status].amount += commission.amount;
+                    stats.byStatus[commission.status].commission += commission.totalCommission;
+
+                    // Por mes
+                    const monthYear = new Date(commission.date).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+                    if (!stats.byMonth[monthYear]) {
+                        stats.byMonth[monthYear] = {
+                            count: 0,
+                            amount: 0,
+                            commission: 0
+                        };
+                    }
+                    stats.byMonth[monthYear].count++;
+                    stats.byMonth[monthYear].amount += commission.amount;
+                    stats.byMonth[monthYear].commission += commission.totalCommission;
+
+                    // Por tipo de propiedad
+                    if (!stats.byPropertyType[commission.propertyType]) {
+                        stats.byPropertyType[commission.propertyType] = {
+                            count: 0,
+                            amount: 0,
+                            commission: 0
+                        };
+                    }
+                    stats.byPropertyType[commission.propertyType].count++;
+                    stats.byPropertyType[commission.propertyType].amount += commission.amount;
+                    stats.byPropertyType[commission.propertyType].commission += commission.totalCommission;
+
+                    // Comisión más alta y más baja
+                    stats.highestCommission = Math.max(stats.highestCommission, commission.totalCommission);
+                    stats.lowestCommission = Math.min(stats.lowestCommission, commission.totalCommission);
+                });
+
+                // Calcular promedio
+                if (commissions.length > 0) {
+                    stats.averageCommission = stats.totalCommission / commissions.length;
+                }
+
+                return stats;
+            },
+
+            updateCommissionStatusUI(stats, commissions) {
+                // Actualizar resumen general
+                document.getElementById('totalPendingCommission').textContent = formatCurrency(stats.byStatus.pending.commission);
+                document.getElementById('totalPaidCommission').textContent = formatCurrency(stats.byStatus.paid.commission);
+                document.getElementById('totalOverdueCommission').textContent = formatCurrency(stats.byStatus.overdue.commission);
+
+                // Crear sección de estadísticas detalladas
+                const statusContent = document.querySelector('.reports-content');
+                const statsSection = document.createElement('div');
+                statsSection.className = 'commission-stats-grid';
+                statsSection.innerHTML = `
+                    <div class="stats-card">
+                        <h4>Resumen General</h4>
+                        <div class="stats-content">
+                            <div class="stats-item">
+                                <span>Total de Comisiones:</span>
+                                <span>${stats.totalCommissions}</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Monto Total:</span>
+                                <span>${formatCurrency(stats.totalAmount)}</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Comisión Total:</span>
+                                <span>${formatCurrency(stats.totalCommission)}</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Tu Comisión Total:</span>
+                                <span>${formatCurrency(stats.yourTotalCommission)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h4>Por Tipo de Operación</h4>
+                        <div class="stats-content">
+                            <div class="stats-item">
+                                <span>Ventas:</span>
+                                <span>${stats.byType.sale.count} (${formatCurrency(stats.byType.sale.commission)})</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Arriendos:</span>
+                                <span>${stats.byType.rent.count} (${formatCurrency(stats.byType.rent.commission)})</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h4>Por Estado</h4>
+                        <div class="stats-content">
+                            <div class="stats-item">
+                                <span>Pendientes:</span>
+                                <span>${stats.byStatus.pending.count} (${formatCurrency(stats.byStatus.pending.commission)})</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Pagadas:</span>
+                                <span>${stats.byStatus.paid.count} (${formatCurrency(stats.byStatus.paid.commission)})</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Vencidas:</span>
+                                <span>${stats.byStatus.overdue.count} (${formatCurrency(stats.byStatus.overdue.commission)})</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h4>Estadísticas de Comisiones</h4>
+                        <div class="stats-content">
+                            <div class="stats-item">
+                                <span>Comisión Promedio:</span>
+                                <span>${formatCurrency(stats.averageCommission)}</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Comisión Más Alta:</span>
+                                <span>${formatCurrency(stats.highestCommission)}</span>
+                            </div>
+                            <div class="stats-item">
+                                <span>Comisión Más Baja:</span>
+                                <span>${formatCurrency(stats.lowestCommission)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h4>Por Tipo de Inmueble</h4>
+                        <div class="stats-content">
+                            ${Object.entries(stats.byPropertyType).map(([type, data]) => `
+                                <div class="stats-item">
+                                    <span>${type}:</span>
+                                    <span>${data.count} (${formatCurrency(data.commission)})</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <h4>Actividad Reciente</h4>
+                        <div class="stats-content">
+                            ${stats.recentActivity.map(activity => `
+                                <div class="stats-item">
+                                    <span>${new Date(activity.date).toLocaleDateString()}</span>
+                                    <span>${activity.propertyTitle} - ${formatCurrency(activity.totalCommission)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Reemplazar o agregar la sección de estadísticas
+                const existingStats = document.querySelector('.commission-stats-grid');
+                if (existingStats) {
+                    existingStats.replaceWith(statsSection);
+                } else {
+                    statusContent.insertBefore(statsSection, document.querySelector('.commission-status-table'));
+                }
+
+                // Actualizar tabla de comisiones
+                const tbody = document.getElementById('commissionStatusBody');
+                tbody.innerHTML = '';
+
+                commissions.forEach(commission => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(commission.date).toLocaleDateString()}</td>
+                        <td>${commission.propertyTitle}</td>
+                        <td>${commission.type === 'sale' ? 'Venta' : 'Arriendo'}</td>
+                        <td>${formatCurrency(commission.amount)}</td>
+                        <td>${formatCurrency(commission.totalCommission)}</td>
+                        <td><span class="status-badge ${commission.status}">${this.getStatusText(commission.status)}</span></td>
+                        <td>${commission.paymentDate ? new Date(commission.paymentDate).toLocaleDateString() : '-'}</td>
+                        <td>
+                            <button onclick="ModalManager.updateCommissionStatus(${commission.propertyId}, ${commission.id})" class="btn-icon edit" title="Cambiar Estado">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            generateReport() {
+                const period = document.getElementById('reportPeriod').value;
+                const propertyType = document.getElementById('reportPropertyType').value;
+                const properties = this.storage.getAllProperties();
+                
+                // Filtrar propiedades según el período y tipo
+                let filteredProperties = properties;
+                if (propertyType !== 'all') {
+                    filteredProperties = properties.filter(p => p.tipo === propertyType);
+                }
+                
+                if (period !== 'all') {
+                    const now = new Date();
+                    const cutoffDate = new Date();
+                    switch (period) {
+                        case 'month':
+                            cutoffDate.setMonth(now.getMonth() - 1);
+                            break;
+                        case 'quarter':
+                            cutoffDate.setMonth(now.getMonth() - 3);
+                            break;
+                        case 'year':
+                            cutoffDate.setFullYear(now.getFullYear() - 1);
+                            break;
+                    }
+                    filteredProperties = filteredProperties.filter(p => new Date(p.fechaCreacion) >= cutoffDate);
+                }
+
+                // Calcular estadísticas
+                const stats = this.calculatePropertyStats(filteredProperties);
+                this.updateReportUI(stats);
+                this.generateCharts(filteredProperties);
+            },
+
+            calculatePropertyStats(properties) {
+                const stats = {
+                    totalProperties: properties.length,
+                    totalValue: 0,
+                    totalArea: 0,
+                    averagePrice: 0,
+                    averagePricePerM2: 0,
+                    minPrice: Infinity,
+                    maxPrice: 0,
+                    typeDistribution: {},
+                    priceRanges: {
+                        '0-500k': 0,
+                        '500k-1M': 0,
+                        '1M-2M': 0,
+                        '2M-5M': 0,
+                        '5M+': 0
+                    }
+                };
+
+                properties.forEach(property => {
+                    // Precio total
+                    stats.totalValue += parseFloat(property.precio);
+                    stats.totalArea += parseFloat(property.area);
+                    
+                    // Precios min/max
+                    const price = parseFloat(property.precio);
+                    stats.minPrice = Math.min(stats.minPrice, price);
+                    stats.maxPrice = Math.max(stats.maxPrice, price);
+
+                    // Distribución por tipo
+                    stats.typeDistribution[property.tipo] = (stats.typeDistribution[property.tipo] || 0) + 1;
+
+                    // Distribución por rango de precios
+                    if (price <= 500000) stats.priceRanges['0-500k']++;
+                    else if (price <= 1000000) stats.priceRanges['500k-1M']++;
+                    else if (price <= 2000000) stats.priceRanges['1M-2M']++;
+                    else if (price <= 5000000) stats.priceRanges['2M-5M']++;
+                    else stats.priceRanges['5M+']++;
+                });
+
+                // Calcular promedios
+                if (properties.length > 0) {
+                    stats.averagePrice = stats.totalValue / properties.length;
+                    stats.averagePricePerM2 = stats.totalValue / stats.totalArea;
+                }
+
+                return stats;
+            },
+
+            updateReportUI(stats) {
+                // Actualizar valores en el UI
+                document.getElementById('averagePrice').textContent = formatCurrency(stats.averagePrice);
+                document.getElementById('pricePerM2').textContent = formatCurrency(stats.averagePricePerM2);
+                document.getElementById('minPrice').textContent = formatCurrency(stats.minPrice);
+                document.getElementById('maxPrice').textContent = formatCurrency(stats.maxPrice);
+
+                // Actualizar tabla de resumen por tipo
+                const tbody = document.getElementById('reportsTableBody');
+                tbody.innerHTML = '';
+
+                Object.entries(stats.typeDistribution).forEach(([type, count]) => {
+                    const typeProperties = this.storage.getAllProperties().filter(p => p.tipo === type);
+                    const typeStats = this.calculatePropertyStats(typeProperties);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${type}</td>
+                        <td>${count}</td>
+                        <td>${formatCurrency(typeStats.averagePrice)}</td>
+                        <td>${formatCurrency(typeStats.averagePricePerM2)}</td>
+                        <td>${formatCurrency(typeStats.minPrice)}</td>
+                        <td>${formatCurrency(typeStats.maxPrice)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            generateCharts(properties) {
+                // Gráfico de distribución de precios
+                const priceCtx = document.getElementById('priceDistributionChart').getContext('2d');
+                const priceData = this.calculatePriceDistribution(properties);
+                new Chart(priceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(priceData),
+                        datasets: [{
+                            label: 'Cantidad de Propiedades',
+                            data: Object.values(priceData),
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Gráfico de precio por m²
+                const pricePerM2Ctx = document.getElementById('pricePerM2Chart').getContext('2d');
+                const pricePerM2Data = this.calculatePricePerM2Distribution(properties);
+                new Chart(pricePerM2Ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(pricePerM2Data),
+                        datasets: [{
+                            label: 'Precio por m²',
+                            data: Object.values(pricePerM2Data),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+
+                // Gráfico de tendencia de precios
+                const trendCtx = document.getElementById('priceTrendChart').getContext('2d');
+                const trendData = this.calculatePriceTrend(properties);
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(trendData),
+                        datasets: [{
+                            label: 'Precio Promedio',
+                            data: Object.values(trendData),
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            },
+
+            calculatePriceDistribution(properties) {
+                const ranges = {
+                    '0-500k': 0,
+                    '500k-1M': 0,
+                    '1M-2M': 0,
+                    '2M-5M': 0,
+                    '5M+': 0
+                };
+
+                properties.forEach(property => {
+                    const price = parseFloat(property.precio);
+                    if (price <= 500000) ranges['0-500k']++;
+                    else if (price <= 1000000) ranges['500k-1M']++;
+                    else if (price <= 2000000) ranges['1M-2M']++;
+                    else if (price <= 5000000) ranges['2M-5M']++;
+                    else ranges['5M+']++;
+                });
+
+                return ranges;
+            },
+
+            calculatePricePerM2Distribution(properties) {
+                const distribution = {};
+                properties.forEach(property => {
+                    const pricePerM2 = parseFloat(property.precio) / parseFloat(property.area);
+                    const range = Math.floor(pricePerM2 / 1000) * 1000;
+                    distribution[range] = (distribution[range] || 0) + 1;
+                });
+                return distribution;
+            },
+
+            calculatePriceTrend(properties) {
+                const trend = {};
+                properties.forEach(property => {
+                    const date = new Date(property.fechaCreacion);
+                    const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+                    if (!trend[monthYear]) {
+                        trend[monthYear] = {
+                            total: 0,
+                            count: 0
+                        };
+                    }
+                    trend[monthYear].total += parseFloat(property.precio);
+                    trend[monthYear].count++;
+                });
+
+                // Calcular promedios
+                Object.keys(trend).forEach(key => {
+                    trend[key] = trend[key].total / trend[key].count;
+                });
+
+                return trend;
+            },
+
+            exportReportToCSV() {
+                const properties = this.storage.getAllProperties();
+                const headers = ['Tipo', 'Título', 'Dirección', 'Precio', 'Área', 'Precio/m²', 'Fecha Creación'];
+                const csvContent = [
+                    headers.join(','),
+                    ...properties.map(p => [
+                        p.tipo,
+                        `"${p.titulo}"`,
+                        `"${p.direccion}"`,
+                        p.precio,
+                        p.area,
+                        (p.precio / p.area).toFixed(2),
+                        new Date(p.fechaCreacion).toLocaleDateString()
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `reporte_propiedades_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            generateCommissionReport() {
+                const period = document.getElementById('commissionReportPeriod').value;
+                const propertyType = document.getElementById('commissionReportPropertyType').value;
+                const properties = this.storage.getAllProperties();
+                
+                // Obtener todas las comisiones
+                let allCommissions = [];
+                properties.forEach(property => {
+                    if (property.commissions && property.commissions.length > 0) {
+                        property.commissions.forEach(commission => {
+                            allCommissions.push({
+                                ...commission,
+                                propertyTitle: property.titulo,
+                                propertyType: property.tipo
+                            });
+                        });
+                    }
+                });
+
+                // Filtrar por tipo de propiedad
+                if (propertyType !== 'all') {
+                    allCommissions = allCommissions.filter(c => c.propertyType === propertyType);
+                }
+
+                // Filtrar por período
+                if (period !== 'all') {
+                    const now = new Date();
+                    const cutoffDate = new Date();
+                    switch (period) {
+                        case 'month':
+                            cutoffDate.setMonth(now.getMonth() - 1);
+                            break;
+                        case 'quarter':
+                            cutoffDate.setMonth(now.getMonth() - 3);
+                            break;
+                        case 'year':
+                            cutoffDate.setFullYear(now.getFullYear() - 1);
+                            break;
+                    }
+                    allCommissions = allCommissions.filter(c => new Date(c.date) >= cutoffDate);
+                }
+
+                // Calcular estadísticas de comisiones
+                const stats = this.calculateCommissionStats(allCommissions);
+                this.updateCommissionReportUI(stats, allCommissions);
+            },
+
+            calculateCommissionStats(commissions) {
+                const stats = {
+                    totalCommissions: 0,
+                    totalAmount: 0,
+                    totalCommission: 0,
+                    yourTotalCommission: 0,
+                    partnerTotalCommission: 0,
+                    byType: {
+                        sale: { count: 0, amount: 0, commission: 0 },
+                        rent: { count: 0, amount: 0, commission: 0 }
+                    },
+                    byStatus: {
+                        pending: { count: 0, amount: 0 },
+                        paid: { count: 0, amount: 0 },
+                        overdue: { count: 0, amount: 0 }
+                    }
+                };
+
+                commissions.forEach(commission => {
+                    stats.totalCommissions++;
+                    stats.totalAmount += commission.amount;
+                    stats.totalCommission += commission.totalCommission;
+                    stats.yourTotalCommission += commission.yourCommission;
+                    stats.partnerTotalCommission += commission.partnerCommission;
+
+                    // Por tipo
+                    stats.byType[commission.type].count++;
+                    stats.byType[commission.type].amount += commission.amount;
+                    stats.byType[commission.type].commission += commission.totalCommission;
+
+                    // Por estado
+                    stats.byStatus[commission.status].count++;
+                    stats.byStatus[commission.status].amount += commission.yourCommission;
+                });
+
+                return stats;
+            },
+
+            updateCommissionReportUI(stats, commissions) {
+                // Actualizar resumen de comisiones
+                document.getElementById('totalCommissions').textContent = formatCurrency(stats.totalCommission);
+                document.getElementById('totalSaleCommissions').textContent = formatCurrency(stats.byType.sale.commission);
+                document.getElementById('totalRentCommissions').textContent = formatCurrency(stats.byType.rent.commission);
+                
+                document.getElementById('yourTotalCommission').textContent = formatCurrency(stats.yourTotalCommission);
+                document.getElementById('yourSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('yourRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+                
+                document.getElementById('partnerTotalCommission').textContent = formatCurrency(stats.partnerTotalCommission);
+                document.getElementById('partnerSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('partnerRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+
+                // Actualizar tabla de comisiones
+                const tbody = document.getElementById('commissionReportBody');
+                tbody.innerHTML = '';
+
+                commissions.forEach(commission => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(commission.date).toLocaleDateString()}</td>
+                        <td>${commission.propertyTitle}</td>
+                        <td>${commission.type === 'sale' ? 'Venta' : 'Arriendo'}</td>
+                        <td>${formatCurrency(commission.amount)}</td>
+                        <td>${formatCurrency(commission.totalCommission)}</td>
+                        <td>${formatCurrency(commission.yourCommission)}</td>
+                        <td><span class="status-badge ${commission.status}">${this.getStatusText(commission.status)}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            exportCommissionReportToCSV() {
+                const properties = this.storage.getAllProperties();
+                const allCommissions = [];
+                
+                properties.forEach(property => {
+                    if (property.commissions && property.commissions.length > 0) {
+                        property.commissions.forEach(commission => {
+                            allCommissions.push({
+                                fecha: new Date(commission.date).toLocaleDateString(),
+                                inmueble: property.titulo,
+                                tipo: commission.type === 'sale' ? 'Venta' : 'Arriendo',
+                                monto: commission.amount,
+                                comisionTotal: commission.totalCommission,
+                                tuComision: commission.yourCommission,
+                                estado: this.getStatusText(commission.status),
+                                fechaPago: commission.paymentDate ? new Date(commission.paymentDate).toLocaleDateString() : ''
+                            });
+                        });
+                    }
+                });
+
+                const headers = ['Fecha', 'Inmueble', 'Tipo', 'Monto', 'Comisión Total', 'Tu Comisión', 'Estado', 'Fecha Pago'];
+                const csvContent = [
+                    headers.join(','),
+                    ...allCommissions.map(c => [
+                        c.fecha,
+                        `"${c.inmueble}"`,
+                        c.tipo,
+                        c.monto,
+                        c.comisionTotal,
+                        c.tuComision,
+                        c.estado,
+                        c.fechaPago
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `reporte_comisiones_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(value);
+        }
+
+        function updateTable(properties) {
+            const tbody = document.getElementById('propertyList');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            properties.forEach(property => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="property-checkbox" data-id="${property.id}"></td>
+                    <td>${property.tipo}</td>
+                    <td>${property.titulo}</td>
+                    <td>${property.direccion}</td>
+                    <td>${formatCurrency(property.precio)}</td>
+                    <td>${property.precioArriendo ? formatCurrency(property.precioArriendo) : '-'}</td>
+                    <td>${property.area} m²</td>
+                    <td>${property.estado}</td>
+                    <td>${property.disponibilidad}</td>
+                    <td>${formatCurrency(property.commissions?.reduce((sum, c) => sum + c.totalCommission, 0) || 0)}</td>
+                    <td>
+                        <button onclick="ModalManager.editProperty(${property.id})" class="btn-icon edit"><i class="fas fa-edit"></i></button>
+                        <button onclick="ModalManager.deleteProperty(${property.id})" class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                        <button onclick="ModalManager.openPropertyCommissionModal(${property.id})" class="btn-icon commission">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAuthenticated = localStorage.getItem('isAuthenticated');
+            if (!isAuthenticated) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            ModalManager.init();
+
+            const propertyForm = document.getElementById('propertyForm');
+            if (propertyForm) {
+                propertyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const property = {
+                        tipo: document.getElementById('tipo').value,
+                        titulo: document.getElementById('titulo').value,
+                        direccion: document.getElementById('direccion').value,
+                        precio: parseFloat(document.getElementById('precio').value) || 0,
+                        precioArriendo: parseFloat(document.getElementById('precioArriendo').value) || 0,
+                        area: parseFloat(document.getElementById('area').value) || 0,
+                        habitaciones: parseInt(document.getElementById('habitaciones').value) || 0,
+                        banos: parseInt(document.getElementById('banos').value) || 0,
+                        estacionamientos: parseInt(document.getElementById('estacionamientos').value) || 0,
+                        antiguedad: parseInt(document.getElementById('antiguedad').value) || 0,
+                        estado: document.getElementById('estado').value,
+                        disponibilidad: document.getElementById('disponibilidad').value,
+                        servicios: {
+                            agua: document.getElementById('agua').checked,
+                            luz: document.getElementById('luz').checked,
+                            gas: document.getElementById('gas').checked,
+                            internet: document.getElementById('internet').checked
+                        },
+                        caracteristicas: {
+                            piscina: document.getElementById('piscina').checked,
+                            jardin: document.getElementById('jardin').checked,
+                            seguridad: document.getElementById('seguridad').checked,
+                            amueblado: document.getElementById('amueblado').checked
+                        },
+                        descripcion: document.getElementById('descripcion').value,
+                        contacto: document.getElementById('contacto').value,
+                        fechaCreacion: new Date().toISOString()
+                    };
+
+                    if (!property.tipo || !property.titulo || !property.direccion || !property.precio || !property.area || !property.disponibilidad || !property.contacto) {
+                        alert('Por favor complete todos los campos requeridos');
+                        return;
+                    }
+
+                    try {
+                        ModalManager.storage.addProperty(property);
+                        
+                        updateTable(ModalManager.storage.getAllProperties());
+                        
+                        ModalManager.close('propertyModal');
+                        
+                        this.reset();
+                        
+                        alert('Propiedad agregada exitosamente');
+                    } catch (error) {
+                        console.error('Error al guardar la propiedad:', error);
+                        alert('Error al guardar la propiedad. Por favor intente nuevamente.');
+                    }
+                });
+            }
+
+            updateTable(ModalManager.storage.getAllProperties());
+        });
+    </script>
+</body>
+</html> 

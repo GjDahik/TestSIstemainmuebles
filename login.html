@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Gestión de Inmuebles</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Sistema de Gestión de Inmuebles</h1>
+                <p>Ingrese sus credenciales para continuar</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i>
+                        Usuario
+                    </label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group remember-me">
+                    <label>
+                        <input type="checkbox" id="remember" name="remember">
+                        Recordarme
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
+                </div>
+                <button type="submit" class="btn primary login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+            <div class="login-footer">
+                <p>¿No tiene una cuenta? <a href="#" id="registerLink">Regístrese aquí</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const togglePassword = document.querySelector('.toggle-password');
+            const passwordInput = document.getElementById('password');
+            const rememberCheckbox = document.getElementById('remember');
+
+            // Cargar credenciales guardadas si existen
+            const savedUsername = localStorage.getItem('username');
+            const savedPassword = localStorage.getItem('password');
+            if (savedUsername && savedPassword) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('password').value = savedPassword;
+                rememberCheckbox.checked = true;
+            }
+
+            // Manejar el toggle de visibilidad de la contraseña
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+
+            // Manejar el envío del formulario
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Validación con las nuevas credenciales
+                if (username === 'admin' && password === 'Francisco112233') {
+                    // Guardar credenciales si "Recordarme" está marcado
+                    if (rememberCheckbox.checked) {
+                        localStorage.setItem('username', username);
+                        localStorage.setItem('password', password);
+                    } else {
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('password');
+                    }
+
+                    // Guardar el estado de la sesión
+                    localStorage.setItem('isAuthenticated', 'true');
+                    
+                    // Redirigir a la página de perfiles de edificios
+                    window.location.href = 'buildings.html';
+                } else {
+                    alert('Usuario o contraseña incorrectos');
+                }
+            });
+
+            // Manejar el enlace de registro
+            document.getElementById('registerLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Funcionalidad de registro en desarrollo');
+            });
+
+            // Manejar el enlace de olvidó contraseña
+            document.querySelector('.forgot-password').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Funcionalidad de recuperación de contraseña en desarrollo');
+            });
+        });
+    </script>
+</body>
+</html> 

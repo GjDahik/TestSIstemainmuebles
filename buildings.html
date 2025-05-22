@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfiles de Edificios - Sistema de Gestión</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="buildings-page">
+    <div class="buildings-container">
+        <header class="buildings-header">
+            <div class="header-left">
+                <button class="btn secondary" onclick="window.location.href='login.html'">
+                    <i class="fas fa-arrow-left"></i> Volver al Login
+                </button>
+            </div>
+            <h1>Perfiles de Edificios</h1>
+            <div class="header-actions">
+                <button class="btn primary" id="createBuildingBtn">
+                    <i class="fas fa-plus"></i>
+                    Crear Edificio
+                </button>
+                <button class="btn danger" id="logoutBtn" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <div class="buildings-grid" id="buildingsGrid">
+            <!-- Las tarjetas de edificios se generarán dinámicamente aquí -->
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar edificio -->
+    <div class="modal" id="buildingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Crear Nuevo Edificio</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="buildingForm">
+                <div class="form-group">
+                    <label for="buildingName">Nombre del Edificio</label>
+                    <input type="text" id="buildingName" required>
+                </div>
+                <div class="form-group">
+                    <label for="buildingAddress">Dirección</label>
+                    <input type="text" id="buildingAddress" required>
+                </div>
+                <div class="form-group">
+                    <label for="buildingImage">URL de la Imagen</label>
+                    <input type="url" id="buildingImage" required>
+                </div>
+                <div class="form-group">
+                    <label>Estadísticas</label>
+                    <div class="stats-grid">
+                        <div class="stat-input">
+                            <label for="buildingFloors">Pisos</label>
+                            <input type="number" id="buildingFloors" min="1" required>
+                        </div>
+                        <div class="stat-input">
+                            <label for="buildingUnits">Unidades</label>
+                            <input type="number" id="buildingUnits" min="1" required>
+                        </div>
+                        <div class="stat-input">
+                            <label for="buildingParking">Estacionamientos</label>
+                            <input type="number" id="buildingParking" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Amenidades</label>
+                    <div class="amenities-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="piscina">
+                            <i class="fas fa-swimming-pool"></i> Piscina
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="gimnasio">
+                            <i class="fas fa-dumbbell"></i> Gimnasio
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="seguridad">
+                            <i class="fas fa-shield-alt"></i> Seguridad 24/7
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="jardin">
+                            <i class="fas fa-leaf"></i> Jardín
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="terraza">
+                            <i class="fas fa-umbrella-beach"></i> Terraza
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="amenities" value="salon">
+                            <i class="fas fa-glass-cheers"></i> Salón de Eventos
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary" id="cancelBuilding">Cancelar</button>
+                    <button type="submit" class="btn primary">Guardar Edificio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Verificar si el usuario está autenticado
+        function checkAuth() {
+            const isAuthenticated = localStorage.getItem('isAuthenticated');
+            if (!isAuthenticated) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Clase para manejar el almacenamiento de edificios
+        class BuildingStorage {
+            constructor() {
+                this.buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+                // Agregar el Edificio Azul por defecto si no hay edificios
+                if (this.buildings.length === 0) {
+                    this.buildings.push({
+                        id: 'edificio-azul',
+                        name: 'Edificio Azul',
+                        address: 'Av. Principal 123, Ciudad',
+                        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                        stats: {
+                            floors: 15,
+                            units: 120,
+                            parking: 200
+                        },
+                        amenities: ['piscina', 'gimnasio', 'seguridad']
+                    });
+                    this.saveBuildings();
+                }
+            }
+
+            saveBuildings() {
+                localStorage.setItem('buildings', JSON.stringify(this.buildings));
+            }
+
+            addBuilding(building) {
+                building.id = 'building-' + Date.now();
+                this.buildings.push(building);
+                this.saveBuildings();
+            }
+
+            getBuildings() {
+                return this.buildings;
+            }
+        }
+
+        // Inicializar el almacenamiento de edificios
+        const buildingStorage = new BuildingStorage();
+
+        // Función para crear la tarjeta de un edificio
+        function createBuildingCard(building) {
+            return `
+                <div class="building-card" onclick="window.location.href='index.html?building=${building.id}'">
+                    <div class="building-image">
+                        <img src="${building.image}" alt="${building.name}">
+                    </div>
+                    <div class="building-info">
+                        <h2>${building.name}</h2>
+                        <p class="building-address">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${building.address}
+                        </p>
+                        <div class="building-stats">
+                            <div class="stat">
+                                <i class="fas fa-building"></i>
+                                <span>${building.stats.floors} Pisos</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-door-open"></i>
+                                <span>${building.stats.units} Unidades</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-car"></i>
+                                <span>${building.stats.parking} Estacionamientos</span>
+                            </div>
+                        </div>
+                        <div class="building-amenities">
+                            ${building.amenities.map(amenity => {
+                                const icons = {
+                                    'piscina': 'fa-swimming-pool',
+                                    'gimnasio': 'fa-dumbbell',
+                                    'seguridad': 'fa-shield-alt',
+                                    'jardin': 'fa-leaf',
+                                    'terraza': 'fa-umbrella-beach',
+                                    'salon': 'fa-glass-cheers'
+                                };
+                                const labels = {
+                                    'piscina': 'Piscina',
+                                    'gimnasio': 'Gimnasio',
+                                    'seguridad': 'Seguridad 24/7',
+                                    'jardin': 'Jardín',
+                                    'terraza': 'Terraza',
+                                    'salon': 'Salón de Eventos'
+                                };
+                                return `<span class="amenity"><i class="fas ${icons[amenity]}"></i> ${labels[amenity]}</span>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para mostrar los edificios
+        function displayBuildings() {
+            const buildingsGrid = document.getElementById('buildingsGrid');
+            buildingsGrid.innerHTML = buildingStorage.getBuildings()
+                .map(building => createBuildingCard(building))
+                .join('');
+        }
+
+        // Manejar el formulario de creación de edificio
+        document.getElementById('buildingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const building = {
+                name: document.getElementById('buildingName').value,
+                address: document.getElementById('buildingAddress').value,
+                image: document.getElementById('buildingImage').value,
+                stats: {
+                    floors: parseInt(document.getElementById('buildingFloors').value),
+                    units: parseInt(document.getElementById('buildingUnits').value),
+                    parking: parseInt(document.getElementById('buildingParking').value)
+                },
+                amenities: Array.from(document.querySelectorAll('input[name="amenities"]:checked'))
+                    .map(checkbox => checkbox.value)
+            };
+
+            buildingStorage.addBuilding(building);
+            displayBuildings();
+            closeBuildingModal();
+        });
+
+        // Funciones para el modal
+        function openBuildingModal() {
+            const modal = document.getElementById('buildingModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBuildingModal() {
+            const modal = document.getElementById('buildingModal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = '';
+            document.getElementById('buildingForm').reset();
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            displayBuildings();
+
+            // Botón de crear edificio
+            document.getElementById('createBuildingBtn').addEventListener('click', openBuildingModal);
+
+            // Botón de cerrar modal
+            document.getElementById('closeModal').addEventListener('click', closeBuildingModal);
+            document.getElementById('cancelBuilding').addEventListener('click', closeBuildingModal);
+
+            // Cerrar modal al hacer clic fuera
+            document.getElementById('buildingModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeBuildingModal();
+                }
+            });
+
+            // Botón de cerrar sesión
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('rememberedUser');
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html> 
