@@ -105,11 +105,7 @@ class BuildingStorage {
 class PropertyStorage {
     constructor() {
         this.currentBuilding = this.getCurrentBuilding();
-        if (this.currentBuilding) {
-            this.properties = this.loadProperties();
-        } else {
-            this.properties = [];
-        }
+        this.properties = this.loadProperties();
     }
 
     getCurrentBuilding() {
@@ -132,26 +128,22 @@ class PropertyStorage {
 
     // Cargar propiedades desde localStorage
     loadProperties() {
-        if (!this.currentBuilding) return [];
         const buildingProperties = JSON.parse(localStorage.getItem(`properties_${this.currentBuilding.id}`)) || [];
         return buildingProperties;
     }
 
     // Guardar propiedades en localStorage
     saveProperties() {
-        if (!this.currentBuilding) return;
         localStorage.setItem(`properties_${this.currentBuilding.id}`, JSON.stringify(this.properties));
     }
 
     // Obtener todas las propiedades
     getAllProperties() {
-        if (!this.currentBuilding) return [];
         return this.properties;
     }
 
     // Agregar una nueva propiedad
     addProperty(property) {
-        if (!this.currentBuilding) return;
         property.id = Date.now();
         property.buildingId = this.currentBuilding.id;
         this.properties.push(property);
@@ -160,7 +152,6 @@ class PropertyStorage {
 
     // Actualizar una propiedad existente
     updateProperty(id, updatedProperty) {
-        if (!this.currentBuilding) return;
         const index = this.properties.findIndex(p => p.id === id);
         if (index !== -1) {
             this.properties[index] = { ...this.properties[index], ...updatedProperty };
@@ -170,14 +161,8 @@ class PropertyStorage {
 
     // Eliminar una propiedad
     deleteProperty(id) {
-        if (!this.currentBuilding) return;
         this.properties = this.properties.filter(p => p.id !== id);
         this.saveProperties();
-    }
-
-    getPropertyById(id) {
-        if (!this.currentBuilding) return null;
-        return this.properties.find(p => p.id === id);
     }
 
     // Método adicional para limpiar todos los datos
@@ -185,8 +170,12 @@ class PropertyStorage {
         this.properties = [];
         localStorage.removeItem('properties');
     }
+
+    getPropertyById(id) {
+        return this.properties.find(p => p.id === id);
+    }
 }
 
 // Crear instancias globales del almacenamiento
 const buildingStorage = new BuildingStorage();
-const propertyStorage = new PropertyStorage();
+const propertyStorage = new PropertyStorage(); 
