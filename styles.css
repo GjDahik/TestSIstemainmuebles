@@ -243,7 +243,7 @@ header h1 {
 @keyframes button-loading {
     to {
         transform: rotate(360deg);
-    }
+}
 }
 
 /* Botón con badge */

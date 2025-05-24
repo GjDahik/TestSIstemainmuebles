@@ -1,3 +1,106 @@
+// Clase para manejar el almacenamiento de edificios
+class BuildingStorage {
+    constructor() {
+        this.buildings = this.loadBuildings();
+        if (this.buildings.length === 0) {
+            this.initializeDefaultBuildings();
+        }
+    }
+
+    loadBuildings() {
+        return JSON.parse(localStorage.getItem('buildings')) || [];
+    }
+
+    saveBuildings() {
+        localStorage.setItem('buildings', JSON.stringify(this.buildings));
+    }
+
+    initializeDefaultBuildings() {
+        const defaultBuildings = [
+            {
+                id: 'edificio-azul',
+                name: 'Edificio Azul',
+                address: 'Av. Principal 123, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 15, units: 120, parking: 200 },
+                amenities: ['piscina', 'gimnasio', 'seguridad']
+            },
+            {
+                id: 'torre-verde',
+                name: 'Torre Verde',
+                address: 'Calle Secundaria 456, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 20, units: 150, parking: 250 },
+                amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin']
+            },
+            {
+                id: 'edificio-rojo',
+                name: 'Edificio Rojo',
+                address: 'Av. Terciaria 789, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 10, units: 80, parking: 100 },
+                amenities: ['piscina', 'seguridad']
+            },
+            {
+                id: 'torre-amarilla',
+                name: 'Torre Amarilla',
+                address: 'Calle Cuarta 101, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 25, units: 200, parking: 300 },
+                amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin', 'terraza']
+            },
+            {
+                id: 'edificio-morado',
+                name: 'Edificio Morado',
+                address: 'Av. Quinta 202, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 12, units: 90, parking: 120 },
+                amenities: ['piscina', 'gimnasio', 'seguridad', 'salon']
+            },
+            {
+                id: 'torre-naranja',
+                name: 'Torre Naranja',
+                address: 'Calle Sexta 303, Ciudad',
+                images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                stats: { floors: 18, units: 160, parking: 220 },
+                amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin', 'terraza', 'salon']
+            }
+        ];
+        this.buildings = defaultBuildings;
+        this.saveBuildings();
+    }
+
+    addBuilding(building) {
+        building.id = 'building-' + Date.now();
+        this.buildings.push(building);
+        this.saveBuildings();
+    }
+
+    updateBuilding(buildingId, updatedBuilding) {
+        const index = this.buildings.findIndex(b => b.id === buildingId);
+        if (index !== -1) {
+            this.buildings[index] = { ...this.buildings[index], ...updatedBuilding };
+            this.saveBuildings();
+        }
+    }
+
+    getBuildings() {
+        return this.buildings;
+    }
+
+    getBuilding(buildingId) {
+        return this.buildings.find(b => b.id === buildingId);
+    }
+
+    deleteBuilding(buildingId) {
+        const index = this.buildings.findIndex(b => b.id === buildingId);
+        if (index !== -1) {
+            this.buildings.splice(index, 1);
+            this.saveBuildings();
+        }
+    }
+}
+
 // Clase para manejar el almacenamiento de propiedades
 class PropertyStorage {
     constructor() {
@@ -73,5 +176,6 @@ class PropertyStorage {
     }
 }
 
-// Crear una instancia global del almacenamiento
+// Crear instancias globales del almacenamiento
+const buildingStorage = new BuildingStorage();
 const propertyStorage = new PropertyStorage(); 
