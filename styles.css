@@ -1660,6 +1660,9 @@ tr:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .building-card:hover {
@@ -2303,4 +2306,20 @@ tr:hover {
     .whatsapp-float i {
         font-size: 28px;
     }
-} 
+}
+
+.building-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.building-content {
+    flex: 1;
+}
+
+.building-actions {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid #eee;
+}
