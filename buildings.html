@@ -294,37 +294,37 @@
             };
             
             card.innerHTML = `
-                <div class="building-image">
+                    <div class="building-image">
                     <img src="${building.images[0]}" alt="${building.name}">
                     ${building.images.length > 1 ? `<span class="image-count">+${building.images.length - 1}</span>` : ''}
-                </div>
-                <div class="building-info">
-                    <h2>${building.name}</h2>
-                    <p class="building-address">
-                        <i class="fas fa-map-marker-alt"></i>
-                        ${building.address}
-                    </p>
-                    <div class="building-stats">
-                        <div class="stat">
-                            <i class="fas fa-building"></i>
-                            <span>${building.stats.floors} Pisos</span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-door-open"></i>
-                            <span>${building.stats.units} Unidades</span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-parking"></i>
-                            <span>${building.stats.parking} Estacionamientos</span>
-                        </div>
                     </div>
-                    <div class="building-amenities">
+                    <div class="building-info">
+                        <h2>${building.name}</h2>
+                        <p class="building-address">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${building.address}
+                        </p>
+                        <div class="building-stats">
+                            <div class="stat">
+                                <i class="fas fa-building"></i>
+                                <span>${building.stats.floors} Pisos</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-door-open"></i>
+                                <span>${building.stats.units} Unidades</span>
+                            </div>
+                            <div class="stat">
+                            <i class="fas fa-parking"></i>
+                                <span>${building.stats.parking} Estacionamientos</span>
+                            </div>
+                        </div>
+                        <div class="building-amenities">
                         ${building.amenities.map(amenity => `
                             <span class="amenity" data-amenity="${amenity}" title="${amenity.charAt(0).toUpperCase() + amenity.slice(1)}">
                                 <i class="fas ${amenityIcons[amenity]}"></i>
                             </span>
                         `).join('')}
-                    </div>
+                        </div>
                     <div class="building-actions">
                         <button class="btn secondary edit-building" onclick="event.stopPropagation(); editBuilding('${building.id}')" title="Editar edificio">
                             <i class="fas fa-edit"></i>
@@ -376,7 +376,7 @@
                 });
                 imageUrls.push(imageUrl);
             }
-
+            
             const building = {
                 name: document.getElementById('buildingName').value,
                 address: document.getElementById('buildingAddress').value,
@@ -394,7 +394,7 @@
             if (buildingId) {
                 buildingStorage.updateBuilding(buildingId, building);
             } else {
-                buildingStorage.addBuilding(building);
+            buildingStorage.addBuilding(building);
             }
 
             displayBuildings();
