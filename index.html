@@ -1119,103 +1119,103 @@
                 // Actualizar las estadísticas detalladas
                 const statsSection = document.querySelector('.commission-stats-grid');
                 if (statsSection) {
-                statsSection.innerHTML = `
-                    <div class="stats-card">
-                        <h4>Resumen General</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Total de Comisiones:</span>
-                                <span>${stats.totalCommissions}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Monto Total:</span>
-                                <span>${formatCurrency(stats.totalAmount)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Total:</span>
-                                <span>${formatCurrency(stats.totalCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Tu Comisión Total:</span>
-                                <span>${formatCurrency(stats.yourTotalCommission)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Tipo de Operación</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Ventas:</span>
-                                <span>${stats.byType.sale.count} (${formatCurrency(stats.byType.sale.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Arriendos:</span>
-                                <span>${stats.byType.rent.count} (${formatCurrency(stats.byType.rent.commission)})</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Estado</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Pendientes:</span>
-                                <span>${stats.byStatus.pending.count} (${formatCurrency(stats.byStatus.pending.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Pagadas:</span>
-                                <span>${stats.byStatus.paid.count} (${formatCurrency(stats.byStatus.paid.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Vencidas:</span>
-                                <span>${stats.byStatus.overdue.count} (${formatCurrency(stats.byStatus.overdue.commission)})</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Estadísticas de Comisiones</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Comisión Promedio:</span>
-                                <span>${formatCurrency(stats.averageCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Más Alta:</span>
-                                <span>${formatCurrency(stats.highestCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Más Baja:</span>
-                                <span>${formatCurrency(stats.lowestCommission)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Tipo de Inmueble</h4>
-                        <div class="stats-content">
-                            ${Object.entries(stats.byPropertyType).map(([type, data]) => `
+                    statsSection.innerHTML = `
+                        <div class="stats-card">
+                            <h4>Resumen General</h4>
+                            <div class="stats-content">
                                 <div class="stats-item">
-                                    <span>${type}:</span>
-                                    <span>${data.count} (${formatCurrency(data.commission)})</span>
+                                    <span>Total de Comisiones:</span>
+                                    <span>${stats.totalCommissions}</span>
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Actividad Reciente</h4>
-                        <div class="stats-content">
-                            ${stats.recentActivity.map(activity => `
                                 <div class="stats-item">
-                                    <span>${new Date(activity.date).toLocaleDateString()}</span>
-                                    <span>${activity.propertyTitle} - ${formatCurrency(activity.totalCommission)}</span>
+                                    <span>Monto Total:</span>
+                                    <span>${formatCurrency(stats.totalAmount)}</span>
                                 </div>
-                            `).join('')}
+                                <div class="stats-item">
+                                    <span>Comisión Total:</span>
+                                    <span>${formatCurrency(stats.totalCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Tu Comisión Total:</span>
+                                    <span>${formatCurrency(stats.yourTotalCommission)}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `;
+
+                        <div class="stats-card">
+                            <h4>Por Tipo de Operación</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Ventas:</span>
+                                    <span>${stats.byType.sale.count} (${formatCurrency(stats.byType.sale.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Arriendos:</span>
+                                    <span>${stats.byType.rent.count} (${formatCurrency(stats.byType.rent.commission)})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Por Estado</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Pendientes:</span>
+                                    <span>${stats.byStatus.pending.count} (${formatCurrency(stats.byStatus.pending.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Pagadas:</span>
+                                    <span>${stats.byStatus.paid.count} (${formatCurrency(stats.byStatus.paid.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Vencidas:</span>
+                                    <span>${stats.byStatus.overdue.count} (${formatCurrency(stats.byStatus.overdue.commission)})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Estadísticas de Comisiones</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Comisión Promedio:</span>
+                                    <span>${formatCurrency(stats.averageCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Comisión Más Alta:</span>
+                                    <span>${formatCurrency(stats.highestCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Comisión Más Baja:</span>
+                                    <span>${formatCurrency(stats.lowestCommission)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Por Tipo de Inmueble</h4>
+                            <div class="stats-content">
+                                ${Object.entries(stats.byPropertyType).map(([type, data]) => `
+                                    <div class="stats-item">
+                                        <span>${type}:</span>
+                                        <span>${data.count} (${formatCurrency(data.commission)})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Actividad Reciente</h4>
+                            <div class="stats-content">
+                                ${stats.recentActivity.map(activity => `
+                                    <div class="stats-item">
+                                        <span>${new Date(activity.date).toLocaleDateString()}</span>
+                                        <span>${activity.propertyTitle} - ${formatCurrency(activity.totalCommission)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
             },
 

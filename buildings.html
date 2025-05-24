@@ -7,155 +7,6 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="storage.js"></script>
-
-    <style>
-        .qr-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .qr-button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .qr-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .qr-modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            position: relative;
-        }
-
-        .qr-modal-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-        }
-
-        .qr-container {
-            margin: 20px 0;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .qr-download {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .qr-download:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .building-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 1rem;
-        }
-
-        .building-actions .btn {
-            padding: 8px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .building-actions .btn i {
-            font-size: 1rem;
-        }
-
-        .building-actions .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .building-actions .btn.edit-building:hover {
-            background-color: var(--secondary-hover);
-        }
-
-        .building-actions .btn.view-microsite:hover,
-        .building-actions .btn.qr-button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .building-actions .btn.delete-building:hover {
-            background-color: var(--danger-hover);
-        }
-
-        .building-amenities {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 1rem;
-        }
-
-        .amenity {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            background-color: var(--background-light);
-            border-radius: 50%;
-            color: var(--primary-color);
-            transition: all 0.3s ease;
-        }
-
-        .amenity:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .amenity i {
-            font-size: 1rem;
-        }
-
-        /* Mapeo de amenidades a iconos */
-        .amenity[data-amenity="piscina"] i { content: "\f5cd"; } /* fa-swimming-pool */
-        .amenity[data-amenity="gimnasio"] i { content: "\f44b"; } /* fa-dumbbell */
-        .amenity[data-amenity="seguridad"] i { content: "\f3ed"; } /* fa-shield-alt */
-        .amenity[data-amenity="jardin"] i { content: "\f1bb"; } /* fa-leaf */
-        .amenity[data-amenity="terraza"] i { content: "\f5ca"; } /* fa-umbrella-beach */
-        .amenity[data-amenity="salon"] i { content: "\f79f"; } /* fa-glass-cheers */
-    </style>
 </head>
 <body class="buildings-page">
     <div class="buildings-container">
@@ -255,19 +106,6 @@
         </div>
     </div>
 
-    <!-- Modal para el código QR -->
-    <div id="qrModal" class="qr-modal">
-        <div class="qr-modal-content">
-            <span class="qr-modal-close">&times;</span>
-            <h3>Escanea el código QR</h3>
-            <p>Para acceder al micrositio del edificio</p>
-            <div id="qrcode" class="qr-container"></div>
-            <a id="downloadQR" class="qr-download" download="qr-micrositio.png">
-                <i class="fas fa-download"></i> Descargar QR
-            </a>
-        </div>
-    </div>
-
     <script>
         // Verificar si el usuario está autenticado
         function checkAuth() {
@@ -277,81 +115,173 @@
             }
         }
 
+        // Clase para manejar el almacenamiento de edificios
+        class BuildingStorage {
+            constructor() {
+                // Siempre agregar los 6 edificios aleatorios
+                const randomBuildings = [
+                    {
+                        id: 'edificio-azul',
+                        name: 'Edificio Azul',
+                        address: 'Av. Principal 123, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 15, units: 120, parking: 200 },
+                        amenities: ['piscina', 'gimnasio', 'seguridad']
+                    },
+                    {
+                        id: 'torre-verde',
+                        name: 'Torre Verde',
+                        address: 'Calle Secundaria 456, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 20, units: 150, parking: 250 },
+                        amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin']
+                    },
+                    {
+                        id: 'edificio-rojo',
+                        name: 'Edificio Rojo',
+                        address: 'Av. Terciaria 789, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 10, units: 80, parking: 100 },
+                        amenities: ['piscina', 'seguridad']
+                    },
+                    {
+                        id: 'torre-amarilla',
+                        name: 'Torre Amarilla',
+                        address: 'Calle Cuarta 101, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 25, units: 200, parking: 300 },
+                        amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin', 'terraza']
+                    },
+                    {
+                        id: 'edificio-morado',
+                        name: 'Edificio Morado',
+                        address: 'Av. Quinta 202, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 12, units: 90, parking: 120 },
+                        amenities: ['piscina', 'gimnasio', 'seguridad', 'salon']
+                    },
+                    {
+                        id: 'torre-naranja',
+                        name: 'Torre Naranja',
+                        address: 'Calle Sexta 303, Ciudad',
+                        images: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'],
+                        stats: { floors: 18, units: 160, parking: 220 },
+                        amenities: ['piscina', 'gimnasio', 'seguridad', 'jardin', 'terraza', 'salon']
+                    }
+                ];
+                this.buildings = randomBuildings;
+                this.saveBuildings();
+            }
+
+            saveBuildings() {
+                localStorage.setItem('buildings', JSON.stringify(this.buildings));
+            }
+
+            addBuilding(building) {
+                building.id = 'building-' + Date.now();
+                this.buildings.push(building);
+                this.saveBuildings();
+            }
+
+            updateBuilding(buildingId, updatedBuilding) {
+                const index = this.buildings.findIndex(b => b.id === buildingId);
+                if (index !== -1) {
+                    this.buildings[index] = { ...this.buildings[index], ...updatedBuilding };
+                    this.saveBuildings();
+                }
+            }
+
+            getBuildings() {
+                return this.buildings;
+            }
+
+            getBuilding(buildingId) {
+                return this.buildings.find(b => b.id === buildingId);
+            }
+
+            deleteBuilding(buildingId) {
+                const index = this.buildings.findIndex(b => b.id === buildingId);
+                if (index !== -1) {
+                    this.buildings.splice(index, 1);
+                    this.saveBuildings();
+                }
+            }
+        }
+
+        // Inicializar el almacenamiento de edificios
+        const buildingStorage = new BuildingStorage();
+
         // Función para crear la tarjeta de un edificio
         function createBuildingCard(building) {
-            const card = document.createElement('div');
-            card.className = 'building-card';
-            card.onclick = () => window.location.href = `index.html?building=${encodeURIComponent(building.id)}&buildingName=${encodeURIComponent(building.name)}`;
-            
-            // Mapeo de amenidades a iconos
-            const amenityIcons = {
-                'piscina': 'fa-swimming-pool',
-                'gimnasio': 'fa-dumbbell',
-                'seguridad': 'fa-shield-alt',
-                'jardin': 'fa-leaf',
-                'terraza': 'fa-umbrella-beach',
-                'salon': 'fa-glass-cheers'
-            };
-            
-            card.innerHTML = `
-                <div class="building-image">
-                    <img src="${building.images[0]}" alt="${building.name}">
-                    ${building.images.length > 1 ? `<span class="image-count">+${building.images.length - 1}</span>` : ''}
-                </div>
-                <div class="building-info">
-                    <h2>${building.name}</h2>
-                    <p class="building-address">
-                        <i class="fas fa-map-marker-alt"></i>
-                        ${building.address}
-                    </p>
-                    <div class="building-stats">
-                        <div class="stat">
-                            <i class="fas fa-building"></i>
-                            <span>${building.stats.floors} Pisos</span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-door-open"></i>
-                            <span>${building.stats.units} Unidades</span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-parking"></i>
-                            <span>${building.stats.parking} Estacionamientos</span>
-                        </div>
+            return `
+                <div class="building-card">
+                    <div class="building-image" onclick="window.location.href='index.html?building=${encodeURIComponent(building.id)}&buildingName=${encodeURIComponent(building.name)}'">
+                        <img src="${building.images[0]}" alt="${building.name}">
+                        ${building.images.length > 1 ? `<span class="image-count">+${building.images.length - 1}</span>` : ''}
                     </div>
-                    <div class="building-amenities">
-                        ${building.amenities.map(amenity => `
-                            <span class="amenity" data-amenity="${amenity}" title="${amenity.charAt(0).toUpperCase() + amenity.slice(1)}">
-                                <i class="fas ${amenityIcons[amenity]}"></i>
-                            </span>
-                        `).join('')}
-                    </div>
-                    <div class="building-actions">
-                        <button class="btn secondary edit-building" onclick="event.stopPropagation(); editBuilding('${building.id}')" title="Editar edificio">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn primary view-microsite" onclick="event.stopPropagation(); window.location.href='microsite.html?building=${encodeURIComponent(building.id)}'" title="Ver micrositio">
-                            <i class="fas fa-external-link-alt"></i>
-                        </button>
-                        <button class="btn primary qr-button" onclick="event.stopPropagation(); generateQR('${building.id}', '${building.name}')" title="Generar QR">
-                            <i class="fas fa-qrcode"></i>
-                        </button>
-                        <button class="btn danger delete-building" onclick="event.stopPropagation(); deleteBuilding('${building.id}')" title="Eliminar edificio">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div class="building-info">
+                        <h2>${building.name}</h2>
+                        <p class="building-address">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${building.address}
+                        </p>
+                        <div class="building-stats">
+                            <div class="stat">
+                                <i class="fas fa-building"></i>
+                                <span>${building.stats.floors} Pisos</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-door-open"></i>
+                                <span>${building.stats.units} Unidades</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-car"></i>
+                                <span>${building.stats.parking} Estacionamientos</span>
+                            </div>
+                        </div>
+                        <div class="building-amenities">
+                            ${building.amenities.map(amenity => {
+                                const icons = {
+                                    'piscina': 'fa-swimming-pool',
+                                    'gimnasio': 'fa-dumbbell',
+                                    'seguridad': 'fa-shield-alt',
+                                    'jardin': 'fa-leaf',
+                                    'terraza': 'fa-umbrella-beach',
+                                    'salon': 'fa-glass-cheers'
+                                };
+                                const labels = {
+                                    'piscina': 'Piscina',
+                                    'gimnasio': 'Gimnasio',
+                                    'seguridad': 'Seguridad 24/7',
+                                    'jardin': 'Jardín',
+                                    'terraza': 'Terraza',
+                                    'salon': 'Salón de Eventos'
+                                };
+                                return `<span class="amenity"><i class="fas ${icons[amenity]}"></i> ${labels[amenity]}</span>`;
+                            }).join('')}
+                        </div>
+                        <div class="building-actions">
+                            <button class="btn secondary edit-building" onclick="event.stopPropagation(); editBuilding('${building.id}')" title="Editar edificio">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn primary view-microsite" onclick="event.stopPropagation(); window.location.href='microsite.html?building=${encodeURIComponent(building.id)}'">
+                                <i class="fas fa-external-link-alt"></i> Ver Micrositio
+                            </button>
+                            <button class="btn danger delete-building" onclick="event.stopPropagation(); deleteBuilding('${building.id}')" title="Eliminar edificio">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
-            return card;
         }
 
         // Función para mostrar los edificios
         function displayBuildings() {
             const buildingsGrid = document.getElementById('buildingsGrid');
-            buildingsGrid.innerHTML = '';
-            buildingStorage.getBuildings().forEach(building => {
-                const card = createBuildingCard(building);
-                buildingsGrid.appendChild(card);
-            });
+            buildingsGrid.innerHTML = buildingStorage.getBuildings()
+                .map(building => createBuildingCard(building))
+                .join('');
         }
 
         // Manejar el formulario de creación/edición de edificio
@@ -489,52 +419,6 @@
                 displayBuildings();
             }
         }
-
-        // Función para generar y mostrar el código QR
-        function generateQR(buildingId, buildingName) {
-            const modal = document.getElementById('qrModal');
-            const qrcodeContainer = document.getElementById('qrcode');
-            const downloadButton = document.getElementById('downloadQR');
-            
-            // Limpiar el contenedor QR anterior
-            qrcodeContainer.innerHTML = '';
-            
-            // Generar la URL del micrositio
-            const micrositeUrl = `${window.location.origin}/microsite.html?building=${buildingId}`;
-            
-            // Generar el código QR
-            new QRCode(qrcodeContainer, {
-                text: micrositeUrl,
-                width: 200,
-                height: 200,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            // Configurar el botón de descarga
-            const qrImage = qrcodeContainer.querySelector('img');
-            if (qrImage) {
-                downloadButton.href = qrImage.src;
-                downloadButton.download = `qr-${buildingName.toLowerCase().replace(/\s+/g, '-')}.png`;
-            }
-
-            // Mostrar el modal
-            modal.style.display = 'flex';
-        }
-
-        // Cerrar el modal QR
-        document.querySelector('.qr-modal-close').addEventListener('click', () => {
-            document.getElementById('qrModal').style.display = 'none';
-        });
-
-        // Cerrar el modal al hacer clic fuera
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('qrModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
