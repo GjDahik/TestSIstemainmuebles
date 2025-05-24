@@ -1,20 +1,33 @@
 /* Variables de colores */
 :root {
-    --primary-color: #1a237e;
-    --secondary-color: #2196f3;
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --secondary-hover: #475569;
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --success-color: #22c55e;
+    --success-hover: #16a34a;
+    --text-color: #1e293b;
+    --text-secondary: #64748b;
+    --background-light: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --background-color: #f5f6fa;
-    --text-color: #2c3e50;
-    --border-color: #e0e0e0;
     --hover-color: #1976d2;
-    --success-color: #2e7d32;
-    --danger-color: #c62828;
     --gray-light: #f8f9fa;
     --gray-medium: #e9ecef;
     --gray-dark: #424242;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    --surface-color: #fff;
+    --border-radius: 0.5rem;
+    --warning-color: #ffd700;
+    --light-bg: #f0f0f0;
+    --mobile-padding: 1rem;
+    --tablet-padding: 1.5rem;
+    --desktop-padding: 2rem;
 }
 
 /* Estilos generales */
@@ -61,44 +74,216 @@ header h1 {
     color: #333;
 }
 
+/* Estilos base de botones */
 .btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    transition: all 0.3s ease;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.btn:active {
+    transform: translateY(0);
 }
 
 .btn i {
     font-size: 1rem;
 }
 
+/* Botón primario */
 .btn.primary {
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     color: white;
 }
 
+.btn.primary:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Botón secundario */
 .btn.secondary {
-    background-color: #2196F3;
+    background-color: var(--secondary-color);
     color: white;
 }
 
+.btn.secondary:hover {
+    background-color: var(--secondary-hover);
+}
+
+/* Botón de peligro */
 .btn.danger {
-    background-color: #f44336;
+    background-color: var(--danger-color);
     color: white;
 }
 
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+.btn.danger:hover {
+    background-color: var(--danger-hover);
 }
 
-.btn:active {
-    transform: translateY(0);
+/* Botón de éxito */
+.btn.success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn.success:hover {
+    background-color: var(--success-hover);
+}
+
+/* Botón outline */
+.btn.outline {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn.outline:hover {
+    background-color: var(--background-light);
+    border-color: var(--text-secondary);
+}
+
+/* Botón ghost */
+.btn.ghost {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.btn.ghost:hover {
+    background-color: var(--background-light);
+}
+
+/* Botón icono */
+.btn-icon {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon:hover {
+    background-color: var(--background-light);
+    color: var(--text-color);
+}
+
+.btn-icon.edit:hover {
+    color: var(--primary-color);
+}
+
+.btn-icon.delete:hover {
+    color: var(--danger-color);
+}
+
+.btn-icon.commission:hover {
+    color: var(--success-color);
+}
+
+/* Botón pequeño */
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+/* Botón grande */
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Botón de ancho completo */
+.btn-block {
+    width: 100%;
+}
+
+/* Botón deshabilitado */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Grupo de botones */
+.btn-group {
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+/* Botón con loading */
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid;
+    border-radius: 50%;
+    border-color: currentColor transparent transparent;
+    animation: button-loading 0.6s linear infinite;
+}
+
+@keyframes button-loading {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Botón con badge */
+.btn .badge {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 9999px;
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Botón con tooltip */
+.btn[data-tooltip] {
+    position: relative;
+}
+
+.btn[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    background-color: var(--text-color);
+    color: white;
+    border-radius: 0.25rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-0.25rem);
 }
 
 /* Estilos para la información del edificio en el header */
@@ -1835,5 +2020,287 @@ tr:hover {
 
     .filter-group select {
         width: 100%;
+    }
+}
+
+/* Media Queries Base */
+@media (max-width: 1200px) {
+    .container {
+        padding: var(--tablet-padding);
+        max-width: 100%;
+    }
+
+    .buildings-grid,
+    .properties-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ajustes generales para móviles */
+    body {
+        font-size: 14px;
+    }
+
+    .container {
+        padding: var(--mobile-padding);
+    }
+
+    /* Header Responsive */
+    header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .header-left, 
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    /* Controles Responsive */
+    .controls {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .left-controls,
+    .search-filters {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .search-box,
+    .sort-options {
+        width: 100%;
+    }
+
+    /* Grids Responsive */
+    .buildings-grid,
+    .properties-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* Cards Responsive */
+    .building-card,
+    .property-card {
+        margin-bottom: 1rem;
+    }
+
+    .building-info,
+    .property-info {
+        padding: 1rem;
+    }
+
+    .building-info h2,
+    .property-info h3 {
+        font-size: 1.2rem;
+    }
+
+    .building-stats,
+    .property-details {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    /* Modales Responsive */
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+        padding: 1rem;
+        max-height: 90vh;
+    }
+
+    .modal-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    /* Formularios Responsive */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+
+    /* Botones Responsive */
+    .btn {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Tablas Responsive */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    /* Galería Responsive */
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .gallery-item {
+        aspect-ratio: 1;
+    }
+
+    /* Banner de contacto Responsive */
+    .contact-banner {
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .contact-banner h2 {
+        font-size: 1.5rem;
+    }
+
+    .contact-banner p {
+        font-size: 1rem;
+    }
+
+    .contact-banner .contact-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* WhatsApp Float Button Responsive */
+    .whatsapp-float {
+        width: 50px;
+        height: 50px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .whatsapp-float i {
+        font-size: 28px;
+    }
+}
+
+/* Mejoras para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: var(--tablet-padding);
+    }
+
+    .buildings-grid,
+    .properties-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mejoras para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal-content {
+        max-height: 85vh;
+    }
+
+    .buildings-grid,
+    .properties-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mejoras para dispositivos táctiles */
+@media (hover: none) {
+    .btn:active {
+        transform: translateY(1px);
+    }
+
+    .building-card:active,
+    .property-card:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 360px) {
+    body {
+        font-size: 13px;
+    }
+
+    .container {
+        padding: 0.5rem;
+    }
+
+    .building-info,
+    .property-info {
+        padding: 0.8rem;
+    }
+
+    .building-stats,
+    .property-details {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* WhatsApp Float Button Responsive */
+@media (max-width: 768px) {
+    .whatsapp-float {
+        width: 50px;
+        height: 50px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .whatsapp-float i {
+        font-size: 28px;
     }
 } 

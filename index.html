@@ -16,7 +16,7 @@
                     <i class="fas fa-arrow-left"></i> Volver a Edificios
                 </button>
             </div>
-            <h1>Sistema de Gestión de Inmuebles</h1>
+            <h1 id="headerTitle">Sistema de Gestión de Inmuebles</h1>
             <div class="header-right">
                 <button class="btn danger" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -890,6 +890,14 @@
                 if (exportCommissionCSVBtn) {
                     exportCommissionCSVBtn.addEventListener('click', () => this.exportCommissionReportToCSV());
                 }
+
+                const generateCommissionStatus = document.getElementById('generateCommissionStatus');
+                if (generateCommissionStatus) {
+                    generateCommissionStatus.addEventListener('click', () => {
+                        this.updateCommissionSummary();
+                        this.updateCommissionStatus();
+                    });
+                }
             },
 
             open(modalId) {
@@ -1007,6 +1015,7 @@
                 this.storage.updateProperty(property);
                 this.updateCommissionHistory(property);
                 updateTable(this.storage.getAllProperties());
+                this.updateCommissionSummary();
                 alert('Comisión eliminada exitosamente');
             },
 
@@ -1064,7 +1073,150 @@
 
                 // Calcular estadísticas detalladas
                 const stats = this.calculateDetailedCommissionStats(allCommissions);
-                this.updateCommissionStatusUI(stats, allCommissions);
+
+                // Actualizar los totales por estado
+                document.getElementById('totalPendingCommission').textContent = formatCurrency(stats.byStatus.pending.commission);
+                document.getElementById('totalPaidCommission').textContent = formatCurrency(stats.byStatus.paid.commission);
+                document.getElementById('totalOverdueCommission').textContent = formatCurrency(stats.byStatus.overdue.commission);
+
+                // Actualizar la tabla de comisiones
+                const tbody = document.getElementById('commissionStatusBody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    allCommissions.forEach(commission => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(commission.date).toLocaleDateString()}</td>
+                            <td>${commission.propertyTitle}</td>
+                            <td>${commission.type === 'sale' ? 'Venta' : 'Arriendo'}</td>
+                            <td>${formatCurrency(commission.amount)}</td>
+                            <td>${formatCurrency(commission.totalCommission)}</td>
+                            <td><span class="status-badge ${commission.status}">${this.getStatusText(commission.status)}</span></td>
+                            <td>${commission.paymentDate ? new Date(commission.paymentDate).toLocaleDateString() : '-'}</td>
+                            <td>
+                                <button onclick="ModalManager.updateCommissionStatus(${commission.propertyId}, ${commission.id})" class="btn-icon edit" title="Cambiar Estado">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+                // Actualizar el resumen de comisiones
+                document.getElementById('totalCommissions').textContent = formatCurrency(stats.totalCommission);
+                document.getElementById('totalSaleCommissions').textContent = formatCurrency(stats.byType.sale.commission);
+                document.getElementById('totalRentCommissions').textContent = formatCurrency(stats.byType.rent.commission);
+                
+                document.getElementById('yourTotalCommission').textContent = formatCurrency(stats.yourTotalCommission);
+                document.getElementById('yourSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('yourRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+                
+                document.getElementById('partnerTotalCommission').textContent = formatCurrency(stats.partnerTotalCommission);
+                document.getElementById('partnerSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('partnerRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+
+                // Actualizar las estadísticas detalladas
+                const statsSection = document.querySelector('.commission-stats-grid');
+                if (statsSection) {
+                    statsSection.innerHTML = `
+                        <div class="stats-card">
+                            <h4>Resumen General</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Total de Comisiones:</span>
+                                    <span>${stats.totalCommissions}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Monto Total:</span>
+                                    <span>${formatCurrency(stats.totalAmount)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Comisión Total:</span>
+                                    <span>${formatCurrency(stats.totalCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Tu Comisión Total:</span>
+                                    <span>${formatCurrency(stats.yourTotalCommission)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Por Tipo de Operación</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Ventas:</span>
+                                    <span>${stats.byType.sale.count} (${formatCurrency(stats.byType.sale.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Arriendos:</span>
+                                    <span>${stats.byType.rent.count} (${formatCurrency(stats.byType.rent.commission)})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Por Estado</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Pendientes:</span>
+                                    <span>${stats.byStatus.pending.count} (${formatCurrency(stats.byStatus.pending.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Pagadas:</span>
+                                    <span>${stats.byStatus.paid.count} (${formatCurrency(stats.byStatus.paid.commission)})</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Vencidas:</span>
+                                    <span>${stats.byStatus.overdue.count} (${formatCurrency(stats.byStatus.overdue.commission)})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Estadísticas de Comisiones</h4>
+                            <div class="stats-content">
+                                <div class="stats-item">
+                                    <span>Comisión Promedio:</span>
+                                    <span>${formatCurrency(stats.averageCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Comisión Más Alta:</span>
+                                    <span>${formatCurrency(stats.highestCommission)}</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span>Comisión Más Baja:</span>
+                                    <span>${formatCurrency(stats.lowestCommission)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Por Tipo de Inmueble</h4>
+                            <div class="stats-content">
+                                ${Object.entries(stats.byPropertyType).map(([type, data]) => `
+                                    <div class="stats-item">
+                                        <span>${type}:</span>
+                                        <span>${data.count} (${formatCurrency(data.commission)})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <h4>Actividad Reciente</h4>
+                            <div class="stats-content">
+                                ${stats.recentActivity.map(activity => `
+                                    <div class="stats-item">
+                                        <span>${new Date(activity.date).toLocaleDateString()}</span>
+                                        <span>${activity.propertyTitle} - ${formatCurrency(activity.totalCommission)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
             },
 
             calculateDetailedCommissionStats(commissions) {
@@ -1149,146 +1301,6 @@
                 }
 
                 return stats;
-            },
-
-            updateCommissionStatusUI(stats, commissions) {
-                // Actualizar resumen general
-                document.getElementById('totalPendingCommission').textContent = formatCurrency(stats.byStatus.pending.commission);
-                document.getElementById('totalPaidCommission').textContent = formatCurrency(stats.byStatus.paid.commission);
-                document.getElementById('totalOverdueCommission').textContent = formatCurrency(stats.byStatus.overdue.commission);
-
-                // Crear sección de estadísticas detalladas
-                const statusContent = document.querySelector('.reports-content');
-                const statsSection = document.createElement('div');
-                statsSection.className = 'commission-stats-grid';
-                statsSection.innerHTML = `
-                    <div class="stats-card">
-                        <h4>Resumen General</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Total de Comisiones:</span>
-                                <span>${stats.totalCommissions}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Monto Total:</span>
-                                <span>${formatCurrency(stats.totalAmount)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Total:</span>
-                                <span>${formatCurrency(stats.totalCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Tu Comisión Total:</span>
-                                <span>${formatCurrency(stats.yourTotalCommission)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Tipo de Operación</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Ventas:</span>
-                                <span>${stats.byType.sale.count} (${formatCurrency(stats.byType.sale.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Arriendos:</span>
-                                <span>${stats.byType.rent.count} (${formatCurrency(stats.byType.rent.commission)})</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Estado</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Pendientes:</span>
-                                <span>${stats.byStatus.pending.count} (${formatCurrency(stats.byStatus.pending.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Pagadas:</span>
-                                <span>${stats.byStatus.paid.count} (${formatCurrency(stats.byStatus.paid.commission)})</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Vencidas:</span>
-                                <span>${stats.byStatus.overdue.count} (${formatCurrency(stats.byStatus.overdue.commission)})</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Estadísticas de Comisiones</h4>
-                        <div class="stats-content">
-                            <div class="stats-item">
-                                <span>Comisión Promedio:</span>
-                                <span>${formatCurrency(stats.averageCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Más Alta:</span>
-                                <span>${formatCurrency(stats.highestCommission)}</span>
-                            </div>
-                            <div class="stats-item">
-                                <span>Comisión Más Baja:</span>
-                                <span>${formatCurrency(stats.lowestCommission)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Por Tipo de Inmueble</h4>
-                        <div class="stats-content">
-                            ${Object.entries(stats.byPropertyType).map(([type, data]) => `
-                                <div class="stats-item">
-                                    <span>${type}:</span>
-                                    <span>${data.count} (${formatCurrency(data.commission)})</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <h4>Actividad Reciente</h4>
-                        <div class="stats-content">
-                            ${stats.recentActivity.map(activity => `
-                                <div class="stats-item">
-                                    <span>${new Date(activity.date).toLocaleDateString()}</span>
-                                    <span>${activity.propertyTitle} - ${formatCurrency(activity.totalCommission)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-
-                // Reemplazar o agregar la sección de estadísticas
-                const existingStats = document.querySelector('.commission-stats-grid');
-                if (existingStats) {
-                    existingStats.replaceWith(statsSection);
-                } else {
-                    statusContent.insertBefore(statsSection, document.querySelector('.commission-status-table'));
-                }
-
-                // Actualizar tabla de comisiones
-                const tbody = document.getElementById('commissionStatusBody');
-                tbody.innerHTML = '';
-
-                commissions.forEach(commission => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(commission.date).toLocaleDateString()}</td>
-                        <td>${commission.propertyTitle}</td>
-                        <td>${commission.type === 'sale' ? 'Venta' : 'Arriendo'}</td>
-                        <td>${formatCurrency(commission.amount)}</td>
-                        <td>${formatCurrency(commission.totalCommission)}</td>
-                        <td><span class="status-badge ${commission.status}">${this.getStatusText(commission.status)}</span></td>
-                        <td>${commission.paymentDate ? new Date(commission.paymentDate).toLocaleDateString() : '-'}</td>
-                        <td>
-                            <button onclick="ModalManager.updateCommissionStatus(${commission.propertyId}, ${commission.id})" class="btn-icon edit" title="Cambiar Estado">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
             },
 
             generateReport() {
@@ -1607,9 +1619,9 @@
                         rent: { count: 0, amount: 0, commission: 0 }
                     },
                     byStatus: {
-                        pending: { count: 0, amount: 0 },
-                        paid: { count: 0, amount: 0 },
-                        overdue: { count: 0, amount: 0 }
+                        pending: { count: 0, amount: 0, commission: 0 },
+                        paid: { count: 0, amount: 0, commission: 0 },
+                        overdue: { count: 0, amount: 0, commission: 0 }
                     }
                 };
 
@@ -1627,7 +1639,8 @@
 
                     // Por estado
                     stats.byStatus[commission.status].count++;
-                    stats.byStatus[commission.status].amount += commission.yourCommission;
+                    stats.byStatus[commission.status].amount += commission.amount;
+                    stats.byStatus[commission.status].commission += commission.totalCommission;
                 });
 
                 return stats;
@@ -1711,6 +1724,201 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            },
+
+            saveSaleCommission() {
+                if (!this.currentProperty) return;
+
+                const salePrice = parseFloat(this.currentProperty.precio);
+                const totalCommission = salePrice * 0.03;
+                const yourCommission = totalCommission * 0.5;
+                const partnerCommission = totalCommission * 0.5;
+
+                const commission = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: 'sale',
+                    amount: salePrice,
+                    totalCommission: totalCommission,
+                    yourCommission: yourCommission,
+                    partnerCommission: partnerCommission,
+                    status: 'pending',
+                    propertyId: this.currentProperty.id
+                };
+
+                if (!this.currentProperty.commissions) {
+                    this.currentProperty.commissions = [];
+                }
+
+                this.currentProperty.commissions.push(commission);
+                this.storage.updateProperty(this.currentProperty);
+                
+                this.updateCommissionHistory(this.currentProperty);
+                updateTable(this.storage.getAllProperties());
+                this.updateCommissionSummary();
+                
+                alert('Comisión de venta guardada exitosamente');
+            },
+
+            saveRentCommission() {
+                if (!this.currentProperty) return;
+
+                const rentPrice = parseFloat(this.currentProperty.precioArriendo || 0);
+                const months = parseInt(document.getElementById('propertyRentMonths').value) || 12;
+                const totalCommission = rentPrice;
+                const yourCommission = totalCommission * 0.5;
+                const partnerCommission = totalCommission * 0.5;
+
+                const commission = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: 'rent',
+                    amount: rentPrice * months,
+                    totalCommission: totalCommission,
+                    yourCommission: yourCommission,
+                    partnerCommission: partnerCommission,
+                    status: 'pending',
+                    propertyId: this.currentProperty.id,
+                    months: months
+                };
+
+                if (!this.currentProperty.commissions) {
+                    this.currentProperty.commissions = [];
+                }
+
+                this.currentProperty.commissions.push(commission);
+                this.storage.updateProperty(this.currentProperty);
+                
+                this.updateCommissionHistory(this.currentProperty);
+                updateTable(this.storage.getAllProperties());
+                this.updateCommissionSummary();
+                
+                alert('Comisión de arriendo guardada exitosamente');
+            },
+
+            updateCommissionStatus(propertyId, commissionId) {
+                const property = this.storage.getPropertyById(propertyId);
+                if (!property || !property.commissions) return;
+
+                const commission = property.commissions.find(c => c.id === commissionId);
+                if (!commission) return;
+
+                // Crear un modal para cambiar el estado
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h2>Cambiar Estado de Comisión</h2>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="commissionStatus">Estado</label>
+                            <select id="commissionStatus">
+                                <option value="pending" ${commission.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                                <option value="paid" ${commission.status === 'paid' ? 'selected' : ''}>Pagado</option>
+                                <option value="overdue" ${commission.status === 'overdue' ? 'selected' : ''}>Vencido</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="paymentDateGroup" style="display: ${commission.status === 'paid' ? 'block' : 'none'}">
+                            <label for="paymentDate">Fecha de Pago</label>
+                            <input type="date" id="paymentDate" value="${commission.paymentDate ? new Date(commission.paymentDate).toISOString().split('T')[0] : ''}">
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn primary" id="saveCommissionStatus">Guardar</button>
+                            <button class="btn secondary" id="cancelCommissionStatus">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+                modal.style.display = 'flex';
+                setTimeout(() => modal.style.opacity = '1', 10);
+
+                // Manejar el cambio de estado
+                const statusSelect = modal.querySelector('#commissionStatus');
+                const paymentDateGroup = modal.querySelector('#paymentDateGroup');
+                statusSelect.addEventListener('change', () => {
+                    paymentDateGroup.style.display = statusSelect.value === 'paid' ? 'block' : 'none';
+                });
+
+                // Manejar el guardado
+                const saveBtn = modal.querySelector('#saveCommissionStatus');
+                saveBtn.addEventListener('click', () => {
+                    const newStatus = statusSelect.value;
+                    const paymentDate = newStatus === 'paid' ? modal.querySelector('#paymentDate').value : null;
+
+                    commission.status = newStatus;
+                    commission.paymentDate = paymentDate;
+
+                    this.storage.updateProperty(property);
+                    
+                    // Actualizar todas las vistas relacionadas con comisiones
+                    this.updateCommissionHistory(property);
+                    updateTable(this.storage.getAllProperties());
+                    this.updateCommissionSummary();
+
+                    // Cerrar el modal
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(modal);
+                    }, 300);
+                });
+
+                // Manejar el cierre
+                const closeBtn = modal.querySelector('.close-btn');
+                const cancelBtn = modal.querySelector('#cancelCommissionStatus');
+                const closeModal = () => {
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(modal);
+                    }, 300);
+                };
+
+                closeBtn.addEventListener('click', closeModal);
+                cancelBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+            },
+
+            updateCommissionSummary() {
+                const properties = this.storage.getAllProperties();
+                let allCommissions = [];
+                properties.forEach(prop => {
+                    if (prop.commissions && prop.commissions.length > 0) {
+                        prop.commissions.forEach(comm => {
+                            allCommissions.push({
+                                ...comm,
+                                propertyTitle: prop.titulo,
+                                propertyType: prop.tipo
+                            });
+                        });
+                    }
+                });
+
+                // Calcular estadísticas actualizadas
+                const stats = this.calculateCommissionStats(allCommissions);
+
+                // Actualizar los elementos del resumen
+                document.getElementById('totalCommissions').textContent = formatCurrency(stats.totalCommission);
+                document.getElementById('totalSaleCommissions').textContent = formatCurrency(stats.byType.sale.commission);
+                document.getElementById('totalRentCommissions').textContent = formatCurrency(stats.byType.rent.commission);
+
+                document.getElementById('yourTotalCommission').textContent = formatCurrency(stats.yourTotalCommission);
+                document.getElementById('yourSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('yourRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+
+                document.getElementById('partnerTotalCommission').textContent = formatCurrency(stats.partnerTotalCommission);
+                document.getElementById('partnerSaleCommission').textContent = formatCurrency(stats.byType.sale.commission * 0.5);
+                document.getElementById('partnerRentCommission').textContent = formatCurrency(stats.byType.rent.commission * 0.5);
+
+                if (document.getElementById('totalPendingCommission'))
+                    document.getElementById('totalPendingCommission').textContent = formatCurrency(stats.byStatus.pending.commission);
+                if (document.getElementById('totalPaidCommission'))
+                    document.getElementById('totalPaidCommission').textContent = formatCurrency(stats.byStatus.paid.commission);
+                if (document.getElementById('totalOverdueCommission'))
+                    document.getElementById('totalOverdueCommission').textContent = formatCurrency(stats.byStatus.overdue.commission);
             }
         };
 
@@ -1756,6 +1964,13 @@
             if (!isAuthenticated) {
                 window.location.href = 'login.html';
                 return;
+            }
+
+            // Obtener el nombre del edificio desde la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const buildingName = urlParams.get('buildingName');
+            if (buildingName) {
+                document.getElementById('headerTitle').textContent = 'Sistema de Gestión - ' + buildingName;
             }
 
             ModalManager.init();

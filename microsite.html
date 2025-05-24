@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micrositio del Edificio - Sistema de Gestión</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .microsite-header {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), var(--header-image);
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-info {
+            padding: 1.5rem;
+        }
+
+        .property-info h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-color);
+        }
+
+        .property-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .detail-item i {
+            color: var(--primary-color);
+        }
+
+        .property-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 1rem;
+        }
+
+        .modal-gallery {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+        }
+
+        .modal-gallery-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-gallery img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .modal-gallery .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .modal-gallery .prev,
+        .modal-gallery .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 1rem;
+        }
+
+        .modal-gallery .prev {
+            left: 20px;
+        }
+
+        .modal-gallery .next {
+            right: 20px;
+        }
+
+        .property-description {
+            margin: 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .property-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .property-status.disponible {
+            background-color: #e3fcef;
+            color: #00a854;
+        }
+
+        .property-status.reservado {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+
+        .property-status.vendido {
+            background-color: #fff1f0;
+            color: #f5222d;
+        }
+
+        .no-properties {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .no-properties i {
+            font-size: 3rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .no-properties p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .contact-banner {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .contact-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-banner p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .contact-banner .contact-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #25D366;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .contact-banner .contact-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .contact-banner .contact-button i {
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .contact-banner {
+                padding: 1.5rem;
+                margin: 1rem 0;
+            }
+
+            .contact-banner h2 {
+                font-size: 1.5rem;
+            }
+
+            .contact-banner p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="microsite-header" id="buildingHeader">
+        <h1 id="buildingName">Cargando...</h1>
+        <p id="buildingAddress" class="building-address">Cargando...</p>
+    </div>
+
+    <div class="container">
+        <!-- Banner de contacto -->
+        <div class="contact-banner">
+            <h2>¡Comunícate con nosotros!</h2>
+            <p>¿Tienes preguntas sobre este edificio? Estamos aquí para ayudarte.</p>
+            <a href="https://wa.me/593987001113" class="contact-button" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-whatsapp"></i>
+                Chatear por WhatsApp
+            </a>
+        </div>
+
+        <section class="gallery-section">
+            <h2>Galería de Fotos</h2>
+            <div class="gallery" id="buildingGallery">
+                <!-- Las imágenes se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <section class="properties-section">
+            <h2>Propiedades Disponibles</h2>
+            <div class="properties-grid" id="propertiesGrid">
+                <!-- Las propiedades se cargarán dinámicamente -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal para la galería -->
+    <div class="modal-gallery" id="galleryModal">
+        <div class="modal-gallery-content">
+            <span class="close">&times;</span>
+            <span class="prev">&lt;</span>
+            <img id="modalImage" src="" alt="">
+            <span class="next">&gt;</span>
+        </div>
+    </div>
+
+    <!-- Botón flotante de WhatsApp -->
+    <a href="https://wa.me/593987001113" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        // Obtener el ID del edificio de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const buildingId = urlParams.get('building');
+
+        // Cargar los datos del edificio
+        function loadBuildingData() {
+            const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+            const building = buildings.find(b => b.id === buildingId);
+            
+            if (building) {
+                // Actualizar el header
+                document.getElementById('buildingName').textContent = building.name;
+                document.getElementById('buildingAddress').textContent = building.address;
+                document.querySelector('.microsite-header').style.setProperty('--header-image', `url(${building.images[0]})`);
+
+                // Cargar la galería
+                const gallery = document.getElementById('buildingGallery');
+                building.images.forEach((image, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'gallery-item';
+                    div.innerHTML = `
+                        <img src="${image}" alt="${building.name} - Imagen ${index + 1}" 
+                             onclick="openGalleryModal(${index})">
+                    `;
+                    gallery.appendChild(div);
+                });
+
+                // Cargar las propiedades
+                loadProperties(building);
+            }
+        }
+
+        // Cargar las propiedades del edificio
+        function loadProperties(building) {
+            // Obtener las propiedades específicas del edificio
+            const properties = JSON.parse(localStorage.getItem(`properties_${buildingId}`)) || [];
+            console.log('Propiedades del edificio:', properties);
+            
+            const propertiesGrid = document.getElementById('propertiesGrid');
+            if (properties.length === 0) {
+                propertiesGrid.innerHTML = `
+                    <div class="no-properties">
+                        <i class="fas fa-home"></i>
+                        <p>No hay propiedades disponibles en este edificio</p>
+                    </div>
+                `;
+                return;
+            }
+
+            properties.forEach(property => {
+                const div = document.createElement('div');
+                div.className = 'property-card';
+                div.innerHTML = `
+                    <div class="property-image">
+                        <img src="${property.images?.[0] || 'placeholder.jpg'}" alt="${property.titulo}">
+                        ${property.images && property.images.length > 1 ? `<span class="image-count">+${property.images.length - 1}</span>` : ''}
+                    </div>
+                    <div class="property-info">
+                        <h3>${property.titulo}</h3>
+                        <div class="property-details">
+                            <div class="detail-item">
+                                <i class="fas fa-ruler-combined"></i>
+                                <span>${property.area} m²</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-bed"></i>
+                                <span>${property.habitaciones} Hab.</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-bath"></i>
+                                <span>${property.banos} Baños</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-car"></i>
+                                <span>${property.estacionamientos} Est.</span>
+                            </div>
+                        </div>
+                        <div class="property-description">
+                            <p>${property.descripcion || 'Sin descripción disponible'}</p>
+                        </div>
+                        <div class="property-price">
+                            ${property.disponibilidad === 'venta' ? 'Venta' : 
+                              property.disponibilidad === 'arriendo' ? 'Arriendo' : 'Venta y Arriendo'}: 
+                            ${property.disponibilidad !== 'arriendo' ? 
+                              `$${property.precio.toLocaleString()}` : 
+                              `$${property.precioArriendo.toLocaleString()}/mes`}
+                        </div>
+                        <div class="property-status ${property.estado}">
+                            ${property.estado === 'nuevo' ? 'Nuevo' : 
+                              property.estado === 'excelente' ? 'Excelente' : 
+                              property.estado === 'bueno' ? 'Bueno' : 
+                              property.estado === 'regular' ? 'Regular' : 'Para remodelar'}
+                        </div>
+                    </div>
+                `;
+                propertiesGrid.appendChild(div);
+            });
+        }
+
+        // Funcionalidad de la galería modal
+        let currentImageIndex = 0;
+        const buildingImages = [];
+
+        function openGalleryModal(index) {
+            currentImageIndex = index;
+            const modal = document.getElementById('galleryModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modal.style.display = 'block';
+            modalImg.src = buildingImages[index];
+        }
+
+        function closeGalleryModal() {
+            document.getElementById('galleryModal').style.display = 'none';
+        }
+
+        function changeImage(direction) {
+            currentImageIndex = (currentImageIndex + direction + buildingImages.length) % buildingImages.length;
+            document.getElementById('modalImage').src = buildingImages[currentImageIndex];
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Cargando datos del edificio...'); // Debug
+            loadBuildingData();
+
+            // Event listeners para la galería modal
+            document.querySelector('.modal-gallery .close').addEventListener('click', closeGalleryModal);
+            document.querySelector('.modal-gallery .prev').addEventListener('click', () => changeImage(-1));
+            document.querySelector('.modal-gallery .next').addEventListener('click', () => changeImage(1));
+
+            // Cerrar modal con la tecla Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeGalleryModal();
+                }
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html> 
