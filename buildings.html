@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 </head>
 <body class="buildings-page">
     <div class="buildings-container">
@@ -103,6 +104,28 @@
                     <button type="submit" class="btn primary">Guardar Edificio</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para el QR code -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-qrcode"></i> Código QR del Micrositio</h2>
+                <button class="close-btn" id="closeQrModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="qrcode"></div>
+                <div id="qrUrl"></div>
+                <div class="download-options">
+                    <button class="btn" id="downloadPng">
+                        <i class="fas fa-file-image"></i> PNG
+                    </button>
+                    <button class="btn" id="downloadSvg">
+                        <i class="fas fa-file-code"></i> SVG
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -213,6 +236,7 @@
 
         // Función para crear la tarjeta de un edificio
         function createBuildingCard(building) {
+            const properties = JSON.parse(localStorage.getItem(`properties_${building.id}`)) || [];
             return `
                 <div class="building-card">
                     <div class="building-content">
@@ -235,10 +259,10 @@
                                     </div>
                                 </div>
                                 <div class="stat">
-                                    <i class="fas fa-door-open"></i>
+                                    <i class="fas fa-home"></i>
                                     <div class="stat-content">
-                                        <span class="stat-number">${building.stats.units}</span>
-                                        <span class="stat-label">Depts.</span>
+                                        <span class="stat-number">${properties.length}</span>
+                                        <span class="stat-label">Propiedades</span>
                                     </div>
                                 </div>
                                 <div class="stat">
@@ -272,6 +296,9 @@
                         </button>
                         <button class="btn primary view-microsite" onclick="event.stopPropagation(); window.location.href='microsite.html?building=${encodeURIComponent(building.id)}'" title="Ver Micrositio">
                             <i class="fas fa-external-link-alt"></i>
+                        </button>
+                        <button class="btn info" onclick="event.stopPropagation(); showQRCode('${building.id}', '${building.name}')" title="Generar QR">
+                            <i class="fas fa-qrcode"></i>
                         </button>
                         <button class="btn danger delete-building" onclick="event.stopPropagation(); deleteBuilding('${building.id}')" title="Eliminar edificio">
                             <i class="fas fa-trash"></i>
@@ -425,6 +452,35 @@
             }
         }
 
+        // Función para mostrar el QR code
+        function showQRCode(buildingId, buildingName) {
+            const modal = document.getElementById('qrModal');
+            const qrContainer = document.getElementById('qrcode');
+            const qrUrl = document.getElementById('qrUrl');
+            
+            qrContainer.innerHTML = '';
+            
+            const micrositeUrl = `${window.location.origin}/microsite.html?building=${buildingId}`;
+            qrUrl.textContent = micrositeUrl;
+            
+            // Generar el código QR con opciones adicionales
+            const qr = new QRCode(qrContainer, {
+                text: micrositeUrl,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Guardar la referencia al QR para uso posterior
+            qrContainer.qrInstance = qr;
+        }
+
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -453,7 +509,64 @@
                 localStorage.removeItem('rememberedUser');
                 window.location.href = 'login.html';
             });
+
+            // Cerrar modal QR
+            document.getElementById('closeQrModal').addEventListener('click', function() {
+                const modal = document.getElementById('qrModal');
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 300);
+            });
+
+            // Descargar QR como PNG
+            document.getElementById('downloadPng').addEventListener('click', function() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = 'qr-micrositio.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            });
+
+            // Descargar QR como SVG
+            document.getElementById('downloadSvg').addEventListener('click', function() {
+                const qrContainer = document.getElementById('qrcode');
+                if (qrContainer.qrInstance) {
+                    const matrix = qrContainer.qrInstance._oQRCode.modules;
+                    const svg = generateQRSvg(matrix);
+                    const blob = new Blob([svg], { type: 'image/svg+xml' });
+                    const link = document.createElement('a');
+                    link.download = 'qr-micrositio.svg';
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                }
+            });
         });
+
+        // Agregar función para generar SVG
+        function generateQRSvg(matrix) {
+            const cellSize = 10;
+            const margin = 40;
+            const size = matrix.length * cellSize + (margin * 2);
+            
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}>
+                <rect width="100%" height="100%" fill="white"/>`;
+            
+            for (let row = 0; row < matrix.length; row++) {
+                for (let col = 0; col < matrix[row].length; col++) {
+                    if (matrix[row][col]) {
+                        svg += `<rect x="${col * cellSize + margin}" y="${row * cellSize + margin}" width="${cellSize}" height="${cellSize}" fill="black"/>`;
+                    }
+                }
+            }
+            
+            svg += '</svg>';
+            return svg;
+        }
     </script>
 </body>
 </html>
